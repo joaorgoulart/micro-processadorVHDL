@@ -4,8 +4,8 @@ use ieee.numeric_std.all;
 
 entity ula is
     port(
-        in0 : in unsigned(15 downto 0);
-        in1 : in unsigned(15 downto 0);
+        inA : in unsigned(15 downto 0);
+        inB : in unsigned(15 downto 0);
         out0 : out unsigned(15 downto 0);
         selec_op : in unsigned(1 downto 0)
     );
@@ -19,9 +19,9 @@ architecture a_ula of ula is
                  '0' when in0<=in1 else
                  '0';
 				 
-		sum <= in0 + in1;
-		subt <= in0 - in1;
-		multip <= in0 and in1;
+		sum <= inA + inB;
+		subt <= inA - inB;
+		multip <= inA and inB;
 
         out0 <= sum when selec_op="00" else
                 subt when selec_op="01" else
