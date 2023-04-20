@@ -54,13 +54,14 @@ begin
 	process 
 	begin
 		wait for 200 ns;
-		wr_en <= '0';
-		data_in <= "1111111111111111"
-		wait for 100 ns;
-		data_in <= "1000110100101001"
-		
-		--[TODO]
-		
+        wr_en <= '1';
+        data_in <= "1111111111111111";
+        wait for 100 ns;
+        data_in <= "1000110110001101";
+        wait for 100 ns;
+        wr_en <= '0';
+        data_in <= "1111111100000000";
 		wait;
+		
 	end process;
 end architecture a_reg16bits_tb;
