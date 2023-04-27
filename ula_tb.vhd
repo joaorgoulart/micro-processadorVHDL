@@ -8,16 +8,16 @@ end;
 architecture a_ula_tb of ula_tb is
 	component ula
 		port(
-			inA : in unsigned(15 downto 0);
-			inB : in unsigned(15 downto 0);
-			out0 : out unsigned(15 downto 0);
-			selec_op : in unsigned(1 downto 0)
+			inA 		: in unsigned(15 downto 0);
+			inB 		: in unsigned(15 downto 0);
+			out0 		: out unsigned(15 downto 0);
+			selec_op 	: in unsigned(1 downto 0)
 		);
 	end component;
-	signal inA, inB, out0 : unsigned(15 downto 0);
-	signal selec_op : unsigned(1 downto 0);
-	signal sum, subt, and_op : unsigned(15 downto 0);
-	signal maior : std_logic;
+	signal inA, inB, out0 		: unsigned(15 downto 0);
+	signal selec_op 			: unsigned(1 downto 0);
+	signal sum, subt, and_op 	: unsigned(15 downto 0);
+	signal maior 				: std_logic;
     begin
 		uut: ula port map(inA => inA,
 						  inB => inB,
