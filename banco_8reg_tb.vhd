@@ -79,17 +79,18 @@ begin
         selec_regA <= "001";
         selec_regB <= "010";
         
-        selec_regWrite <= "001"; -- 
+        selec_regWrite <= "001"; -- escreve no reg 1
         data_input <= "0000000011111111";
 
         wait for 100 ns;
-        selec_regWrite <= "010"; -- 
+        selec_regWrite <= "010"; -- escreve no reg 2
         data_input <= "1111111100000000";
         
         wait for 100 ns;
-        selec_regB <= "111";
-        selec_regWrite <= "111"; -- w
+        selec_regB <= "111"; -- mostra saida do reg 7
+        selec_regWrite <= "111"; -- escreve no reg 7 
         data_input <= "1010101010101010";
+        wait for 100 ns;
         wait;
     end process;
 
