@@ -12,7 +12,7 @@ entity uProc is
         selec_regA      : in unsigned(2 downto 0);
 		selec_regB	    : in unsigned(2 downto 0);
         selec_regWrite	: in unsigned(2 downto 0);
-        const           : in unsigned(15 downto 0);
+        const           : in unsigned(15 downto 0); --entrada externa;
         saida_ula       : out unsigned(15 downto 0)
     );
 end entity;
@@ -50,26 +50,27 @@ architecture a_uProc of uProc is
         );
     end component;
     
-    signal regOutA_ulaA, regOutB_muxB, muxOut_ulaB : unsigned(15 downto 0);
-begin
-    ula: ula port map(inA => regOutA_ulaA, 
+    signal regOutA_ulaA, regOutB_muxA, muxOut_ulaB, saida_ula1 : unsigned(15 downto 0);
+begin   
+    banco_reg1: banco_8reg port map(data_input => saida_ula1, 
+                                    selec_regA => selec_regA, 
+                                    selec_regB => selec_regB, 
+                                    selec_regWrite => selec_regWrite, 
+                                    regA_out => regOutA_ulaA,
+                                    regB_out => regOutB_muxA,
+                                    write_en => write_en, 
+                                    clock => clock, 
+                                    reset => reset);    
+
+    ula1: ula port map(inA => regOutA_ulaA, 
                       inB => muxOut_ulaB, 
-                      out0 => saida_ula, 
+                      out0 => saida_ula1, 
                       selec_op => selec_oper);
-
-    banco_reg: banco_8reg port map(data_input => saida_ula, 
-                                   selec_regA => selec_regB, 
-                                   selec_regB => selec_regB, 
-                                   selec_regWrite => selec_regWrite, 
-                                   regA_out => regOutA_ulaA,
-                                   regB_out => regOutB_muxA,
-                                   write_en => write_en, 
-                                   clock => clock, 
-                                   reset => reset);
-
-    mux: mux port map(inA => const, 
-                      inB => regOutB_muxB, 
+    
+    mux1: mux port map(inA => const, 
+                      inB => regOutB_muxA, 
                       out0 => muxOut_ulaB, 
                       selec => ula_srcB);
 
+    saida_ula <= saida_ula1;
 end architecture;    

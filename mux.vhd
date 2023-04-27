@@ -15,5 +15,5 @@ architecture a_mux of mux is
 begin
     out0 <= inA when selec='0' else
             inB when selec='1' else
-            '0000000000000000';
+            "0000000000000000";
 end architecture;

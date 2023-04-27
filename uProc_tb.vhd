@@ -18,16 +18,18 @@ architecture a_uProc_tb of uProc_tb is
             selec_regWrite	: in unsigned(2 downto 0);
             const           : in unsigned(15 downto 0);
             saida_ula       : out unsigned(15 downto 0)
-    );
+            );
     end component;
     
-    constant period_time 	: time		:= 100 ns;
-	signal finished         : std_logic := '0';
-
-    signal clock, reset, write_en, ula_srcB : std_logic;
-    signal selec_op : unsigned(1 downto 0);
+	--signal finished         : std_logic := '0';
+    signal clock, reset, write_en, ula_srcB, finished : std_logic;
+    signal selec_oper : unsigned(1 downto 0);
     signal selec_regA, selec_regB, selec_regWrite : unsigned(2 downto 0);
-    signal const, saida_ula : unsigned(15 downto 0);
+    signal const : unsigned(15 downto 0);
+    signal saida_ula : unsigned(15 downto 0);
+
+    constant period_time 	: time		:= 25 ns;
+
 begin
     uut: uProc port map(clock => clock,           
                         reset => reset,           
@@ -37,20 +39,21 @@ begin
                         selec_regA => selec_regA,
                         selec_regB => selec_regB, 
                         selec_regWrite => selec_regWrite,
-                        const => const,           
+                        const => const,
                         saida_ula => saida_ula);
 
     reset_global: process
 	begin	
 		reset <= '1';
-		wait for period_time*2;
+		wait for period_time * 2;
 		reset <= '0';
+        wait for 500 ns;
 		wait;
-	end process;
+	end process reset_global;
 
     sim_time_proc: process
 	begin 
-		wait for 10 us;
+		wait for 700 us;
 		finished <= '1';
 		wait;
 	end process sim_time_proc;
@@ -58,9 +61,9 @@ begin
     clk_proc: process
 	begin 
 		while finished /= '1' loop
-			clk <= '0';
+			clock <= '0';
 			wait for period_time/2;
-			clk <= '1';
+			clock <= '1';
 			wait for period_time/2;
 		end loop;
 		wait;
@@ -68,30 +71,31 @@ begin
 	
     process
     begin
+        wait for 100 ns;
         write_en <= '1';
-        wait for 200 ns;
-            selec_oper <= "00";
-            selec_regA <= "000";
-            selec_regB <= "001";
+        
+        selec_oper <= "00"; -- operacao de soma
+        selec_regA <= "000"; --reg0 zerado
+        selec_regB <= "001"; --reg1 zerado
 
-            ula_srcB <= "1";
+        ula_srcB <= '0'; --nesse momento os dados vindos de const serao utilizados;
 
-            selec_regWrite <= "010";
-            const <= "0000000011111111"
-
+            
+        const <= "0000000000000001";
+        selec_regWrite <= "010";--escrevemos o resultado no reg2
 		wait for 100 ns;
-            selec_regA <= "010";
-            const <= "0000000011111111"
-            selec_regWrite <= "010";
 
+            selec_regA <= "010";--lemos o reg2
+           -- const <= "0000000000000001";
+            selec_regWrite <= "011";--escrevemos reg2+const no reg3
+        wait for 100 ns;
+        
+        selec_regA <= "001";--0
+        selec_regB <= "010";--1
+        ula_srcB <= '1'; --lemos o registrador e nao mais a const esxterna;
+        selec_regWrite <= "100";--escrevemos a soma no reg4;
 		wait for 100 ns;
-            ula_srcB <= "0";
-            selec_regA <= "001";
-            selec_regB <= "010";
 
-            selec_regWrite <= "011";
-
-		wait for 100 ns;
-        wait
-    end process;    
+        wait;
+    end process;
 end architecture;    

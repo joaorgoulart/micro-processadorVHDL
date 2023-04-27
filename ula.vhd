@@ -12,20 +12,20 @@ entity ula is
 end entity;
 
 architecture a_ula of ula is
-	signal sum, subt, multip : unsigned(15 downto 0);
+	signal sum, subt, and_op : unsigned(15 downto 0);
 	signal maior : std_logic;
     begin
-        maior <= '1' when in0>in1 else
-                 '0' when in0<=in1 else
+        maior <= '1' when inA>inB else
+                 '0' when inA<=inB else
                  '0';
 				 
 		sum <= inA + inB;
 		subt <= inA - inB;
-		multip <= inA and inB;
+		and_op <= inA and inB;
 
         out0 <= sum when selec_op="00" else
                 subt when selec_op="01" else
-                multip when selec_op="10" else
+                and_op when selec_op="10" else
 				"000000000000000" & maior when selec_op="11" else
 				"0000000000000000";
 end architecture;

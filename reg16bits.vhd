@@ -18,7 +18,7 @@ begin
 	process(clk, rst, wr_en) -- acionado em caso de mudança em clk, rst ou wr_en
 	begin 
 		if rst='1' then
-			registro <= "0000000000000000"
+			registro <= "0000000000000000";
 		elsif wr_en='1' then
 			if rising_edge(clk) then
 				registro  <= data_in;
