@@ -1,0 +1,39 @@
+Carga de Constante 
+	MOV <destino>, <origem>
+	opcode: 0001
+	<destino>: registrador de destino;
+	<origem>: origem de dados, nesse caso uma constante;
+
+Cópia de valor entre registradores
+	MOV <destino>, <origem>
+	opcode: 0001
+	<destino>: registrador de destino;
+	<origem> origem de dados, nesse caso outro registrador;
+
+	A instrução MOV copia do valor da origem para o destino, o valor da origem permanece o mesmo.
+
+Soma de dois valores:
+	ADD <destino>, <value>
+	opcode: 0011
+	<destino>: registrador de destino;
+	<value>: registrador ou constante - o valor é adicionado ao valor do destino;
+	
+	A instrução ADD adiciona o valor ao destino.
+
+Subtração de dois valores:
+	SUB <destino>, <value>
+	opcode: 0100
+	<destino>: registrador de destino;
+	<value>: registrador ou constante - o valor é subtraído do valor do destino;
+	
+	A instrução SUB subtrai o valor do destino.
+
+Desvio incondicional:
+	JMPS <endereço>
+	opcode: 1111
+	<endereço>:  endereço absoluto para o qual será feito o desvio;
+
+	A instrução JMPS realiza um salto incondicional para um endereço específico de memória.
+
+
+
