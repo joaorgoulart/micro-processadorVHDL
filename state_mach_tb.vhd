@@ -9,13 +9,14 @@ architecture a_state_mach_tb of state_mach_tb is
 	component state_mach
 		port(clk	: in std_logic;
 			 rst 	: in std_logic;
-			 state 	: out std_logic
+			 state 	: out unsigned(1 downto 0)
 			 ); 
 	end component;
 	
 	constant period_time	: time		:= 100 ns;
 	signal finished		 	: std_logic := '0';
-	signal clk, rst, state 	: std_logic;
+	signal clk, rst	: std_logic;
+	signal state : unsigned(1 downto 0);
 begin
 	uut: state_mach port map(clk => clk,
 							rst => rst,

@@ -1,0 +1,36 @@
+Na versão final entregue, os pinos visíveis no top level, visualizados no gtkwave, devem ser:
+• reset;
+• clock;
+• estado;
+• PC;
+• instrução (saída do Registrador de Instrução);
+• saídas do banco de registradores (valores de Reg1 e Reg2);
+• saída da ULA.
+
+Pode usar outros pinos durante a implementação e a fase de debug, mas retire-os para a
+entrega.
+Também espero que você teste vários programas durante o desenvolvimento mas, para a
+entrega, o testbench e a ROM devem estar configurados para executar um programa que faz o
+seguinte:
+
+1. Carrega R3 (o registrador 3) com o valor 5
+2. Carrega R4 com 8
+3. Soma R3 com R4 e guarda em R5
+4. Subtrai 1 de R5
+5. Salta para o endereço 20
+6. No endereço 20, copia R5 para R3
+7. Salta para a terceira instrução desta lista (R5 <= R3+R4)
+
+0	nop
+1	MOV R3, #5		0001 011 000 000101
+2	MOV R4, #8		0001 100 000 001000
+3	MOV R5, #0		0001 101 000 000000
+4	ADD R5, R3		0011 101 011 000000
+5	ADD R5, R4		0011 101 100 000000
+6	SUB R5, #1		0100 101 000 000001
+7 	JMPS 20		1111 000 000 010100
+	
+(...)
+
+20	MOV R3, R5		0001 011 101 000000
+21	JMPS 3		1111 000 00 0000000
