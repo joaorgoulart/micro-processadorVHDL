@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 entity uProc is
     port(
         clock           : in std_logic;
-        reset           : in std_logic;       
+        reset           : in std_logic      
     );
 end entity;
 
@@ -48,7 +48,7 @@ architecture a_uProc of uProc is
             clk, rst                                : in std_logic;
             rom_in                                  : in unsigned(15 downto 0);
             ula_srcB, write_en, PC_wr_en, jump_en   : out std_logic;
-            ula_selec_op                            : out unsigned(1 downto 0);
+            ula_selec_op                            : out unsigned(1 downto 0)
         );
     end component;
 
@@ -80,7 +80,7 @@ architecture a_uProc of uProc is
 begin   
     ula1: ula port map( inA => regOutA_ulaA, 
                         inB => muxOut_ulaB, 
-                        out0 => saida_ula1, 
+                        out0 => saida_ula, 
                         selec_op => selec_oper);
 
     banco_reg1: banco_8reg port map(data_input => saida_ula, 
@@ -93,22 +93,22 @@ begin
                                     clock => clock, 
                                     reset => reset);    
     
-    PC1: PC port map(clk => clk
-                     rst => rst
-                     wr_en => PC_wr_en
-                     data_in => PC_data_in
+    PC1: PC port map(clk => clock,
+                     rst => reset,
+                     wr_en => PC_wr_en,
+                     data_in => PC_data_in,
                      data_out => PC_data_out);
                 
-    control_unit1: control_unit port map(clk => clk
-                                         rst => rst
-                                         rom_in => rom_data
-                                         ula_srcB => ula_srcB
-                                         write_en => write_en
-                                         PC_wr_en => PC_wr_en
-                                         jump_en => jump_en
+    control_unit1: control_unit port map(clk => clock,
+                                         rst => reset,
+                                         rom_in => rom_data,
+                                         ula_srcB => ula_srcB,
+                                         write_en => write_en,
+                                         PC_wr_en => PC_wr_en,
+                                         jump_en => jump_en,
                                          ula_selec_op => selec_oper);
    
-    rom1: rom port map(clk=>clock
+    rom1: rom port map(clk=>clock,
                        endereco=> PC_data_out,
                        dado=> rom_data);
                      
@@ -119,14 +119,15 @@ begin
     
     opcode <= rom_data(15 downto 12);
 
-    selec_regA <= "000" when opcode = "0001" else
-                  rom_data(11 downto 9);
-    selec_regB <= rom_data(8 downto 6) when opcode = ""
+    selec_regA <= rom_data(11 downto 9) when opcode = "0001" or opcode = "0010" or opcode = "0011" or opcode = "0100" else
+                  "000";
+    selec_regB <= rom_data(8 downto 6) when opcode = "0010" or opcode = "0011" or opcode = "0100" else
+                  "000";
 
     selec_regWrite <= rom_data(11 downto 9);
 
-    const <= ""
-
+    const <= "0000000" & rom_data(8 downto 0) when rom_data(8) = '0' else "1111111" & rom_data(8 downto 0); 
+    
     jump_address <= rom_data(6 downto 0);
 
     PC_data_in <= PC_data_out + "0000001" when jump_en = '0' else

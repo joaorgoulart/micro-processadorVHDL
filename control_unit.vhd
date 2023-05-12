@@ -7,7 +7,7 @@ entity control_unit is
         clk, rst                                : in std_logic;
         rom_in                                  : in unsigned(15 downto 0);
         ula_srcB, write_en, PC_wr_en, jump_en   : out std_logic;
-        ula_selec_op                            : out unsigned(1 downto 0);
+        ula_selec_op                            : out unsigned(1 downto 0)
     );
 end entity;
 
@@ -32,12 +32,13 @@ begin
 
 
     -- Instruction Fetch -> reads ROM when 0, increments PC when 1
-    PC_wr_en <= '0' when state_sig = "00" else 
-                '1';
+    PC_wr_en <= '1' when state_sig = "00" else 
+                '0';
             
     -- Instruction Decode -> state_sig == 01
     opcode <= rom_in(15 downto 12);
-        -- MOV opcode = 0001
+        -- MOV (load constant) opcode = 0001
+        -- MOV (copy) opcode = 0010
         -- ADD opcode = 0011
         -- SUB opcode = 0100
         -- JMPS opcode = 1111

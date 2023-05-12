@@ -6,7 +6,7 @@ Carga de Constante
 
 Cópia de valor entre registradores
 	MOV <destino>, <origem>
-	opcode: 0001
+	opcode: 0010
 	<destino>: registrador de destino;
 	<origem> origem de dados, nesse caso outro registrador;
 
