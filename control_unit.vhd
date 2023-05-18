@@ -43,8 +43,8 @@ begin
         -- SUB opcode = 0100
         -- JMPS opcode = 1111
     
-    ula_selec_op <= "00" when opcode = "0011" else
-                    "00" when opcode = "0001" else
+    ula_selec_op <= "00" when opcode = "0001" else
+                    "00" when opcode = "0011" else
                     "01" when opcode = "0100" else
                     "00";
 
@@ -55,7 +55,7 @@ begin
                '0';
     ula_srcB <= '0' when opcode = "0001" else
                 '1';
-    write_en <= '1' when state_sig = "10" and (opcode = "0001" or opcode = "0011" or opcode = "0100") else
+    write_en <= '1' when state_sig = "10" and (opcode = "0001" or opcode="0010" or opcode = "0011" or opcode = "0100") else
                 '0';
 
 end architecture;

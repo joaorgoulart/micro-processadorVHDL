@@ -119,8 +119,8 @@ begin
     
     opcode <= rom_data(15 downto 12);
 
-    selec_regA <= rom_data(11 downto 9) when opcode = "0001" or opcode = "0010" or opcode = "0011" or opcode = "0100" else
-                  "000";
+    selec_regA <= "000" when opcode = "0001" or opcode = "0010" else
+                  rom_data(11 downto 9) when opcode = "0011" or opcode = "0100" else "000";
     selec_regB <= rom_data(8 downto 6) when opcode = "0010" or opcode = "0011" or opcode = "0100" else
                   "000";
 
