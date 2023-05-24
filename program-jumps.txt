@@ -1,0 +1,29 @@
+Na versão final entregue, os pinos visíveis no top level, visualizados no gtkwave, devem ser:
+• reset;
+• clock;
+• estado;
+• PC;
+• instrução (saída do Registrador de Instrução);
+• saídas do banco de registradores (valores de Reg1 e Reg2);
+• saída da ULA.
+
+Mantenha os pinos visíveis no top level como descritos no laboratório passado.
+Para a entrega, o testbench e a ROM devem estar configurados para executar um programa
+que faz o seguinte:
+
+1. Carrega R3 (o registrador 3) com o valor 0
+2. Carrega R4 com 0
+3. Soma R3 com R4 e guarda em R4
+4. Soma 1 em R3
+5. Se R3<30 salta para a instrução do passo 3 *
+6. Copia valor de R4 para R
+
+0   MOV R3, 0
+1   MOV R4, 0
+2   ADD R4, R3
+3   ADD R1, 1
+4   ADD R3, R1
+5   JMPR 00, -3     1011 11 1111111101  
+6
+7
+8

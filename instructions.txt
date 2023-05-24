@@ -28,12 +28,40 @@ Subtração de dois valores:
 	
 	A instrução SUB subtrai o valor do destino.
 
+Desvio condicional:
+
+	Desvio Absoluto:
+	JMPA <condição>, <endereço>
+	opcode: 1001
+	<condição>: condição que deverá ser cumprida para o desvio ser realizado;
+
+	Condição	Código
+	= 0			01
+	/= 0		10
+	>=			11
+
+	<endereço>: endereço absoluto para o qual será feito o desvio;
+
+	A instrução JMPA realiza um salto condicional para um endereço absoluto de memória.
+
+	Desvio Relativo:
+	JMPR <condição>, <endereço>
+	opcode: 1011
+	<condição>: condição que deverá ser cumprida para o desvio ser realizado
+
+	Condição	Código
+	= 0			01
+	/= 0		10
+	>=			11
+
+	<endereço>: endereço relativo para o qual será feito o desvio;
+
+	A instrução JMPR realiza um salto condicional para um endereço relativo de memória.
+
+	
 Desvio incondicional:
 	JMPS <endereço>
 	opcode: 1111
 	<endereço>:  endereço absoluto para o qual será feito o desvio;
 
 	A instrução JMPS realiza um salto incondicional para um endereço específico de memória.
-
-
-

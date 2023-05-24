@@ -76,6 +76,7 @@ architecture a_uProc of uProc is
     signal selec_regA, selec_regB, selec_regWrite : unsigned(2 downto 0);
     signal selec_oper : unsigned(1 downto 0); 
     signal ula_srcB, write_en, PC_wr_en, jump_en : std_logic;
+    signal jump_op : unsigned(1 downto 0);
 
 begin   
     ula1: ula port map( inA => regOutA_ulaA, 
@@ -118,6 +119,12 @@ begin
                       selec => ula_srcB);
     
     opcode <= rom_data(15 downto 12);
+
+    jump_op <= rom_data(11 downto 10) when (opcode = "1001" or opcode = "1011") else
+               "00";
+
+    
+    
 
     selec_regA <= "000" when opcode = "0001" or opcode = "0010" else
                   rom_data(11 downto 9) when opcode = "0011" or opcode = "0100" else "000";
