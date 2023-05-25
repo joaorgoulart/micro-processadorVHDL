@@ -55,7 +55,7 @@ architecture a_uProc of uProc is
             reset               : in std_logic;
             rom_data            : in unsigned(15 downto 0);
             ULA_out             : in unsigned(15 downto 0);
-            ULA_inputB          : out unsigned(15 downto 0);
+            ULA_inputB          : out std_logic;
             ULA_selec_op        : out unsigned(1 downto 0);
             PC_data_out         : in unsigned(6 downto 0);
             PC_data_in          : out unsigned(6 downto 0);
