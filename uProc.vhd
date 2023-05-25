@@ -138,14 +138,14 @@ architecture a_uProc of uProc is
     signal carry_sum_SIG    : std_logic;
 
 begin   
-    ula: ula port map(inA           => regOutA_ulaA, 
+    ula_pm: ula port map(inA           => regOutA_ulaA, 
                       inB           => muxOut_ulaB, 
                       data_out      => ULA_output, 
                       selec_op      => ULA_selec_op_SIG,
                       carry_sum     => carry_sum_SIG,
                       carry_subt    => carry_subt_SIG);
 
-    banco_reg: banco_8reg port map(data_input       => ULA_output, 
+    banco_reg_pm: banco_8reg port map(data_input       => ULA_output, 
                                    selec_regA       => selec_regA_SIG, 
                                    selec_regB       => selec_regB_SIG, 
                                    selec_regWrite   => selec_regWrite_SIG, 
@@ -155,13 +155,13 @@ begin
                                    clock            => clock, 
                                    reset            => reset);    
     
-    PC: PC port map(clock       => clock,
+    PC_pm: PC port map(clock       => clock,
                     reset       => reset,
                     write_en    => PC_write_en_SIG,
                     data_in     => PC_data_in_SIG,
                     data_out    => PC_data_out_SIG);
                 
-    control_unit: control_unit port map(clock               => clock,
+    control_unit_pm: control_unit port map(clock               => clock,
                                         reset               => reset,
                                         rom_data            => rom_data_SIG,
                                         ULA_out             => ULA_output,     
@@ -184,28 +184,28 @@ begin
                                         write_en            => write_en_SIG,    
                                         PC_write_en         => PC_write_en_SIG);
    
-    rom: rom port map(clock     => clock,
+    rom_pm: rom port map(clock     => clock,
                       address   => PC_data_out_SIG,
                       data      => rom_data_SIG);
                      
-    mux_ULA_inputB: mux port map(inA        => const_SIG, 
+    mux_ULA_inputB_pm: mux port map(inA        => const_SIG, 
                                  inB        => regOutB_muxA, 
                                  data_out   => muxOut_ulaB, 
                                  selec      => ULA_inputB_SIG);
     
-    Dff_flag_zero: D_ff port map(clock      => clock,
+    Dff_flag_zero_pm: D_ff port map(clock      => clock,
                                  reset      => reset,         
                                  write_en   => update_flag_ff,
                                  D          => is_zero_SIG,
                                  Q          => flag_zero_SIG);
 
-    Dff_flag_not_zero: D_ff port map(clock      => clock,
+    Dff_flag_not_zero_pm: D_ff port map(clock      => clock,
                                      reset      => reset, 
                                      write_en   => update_flag_ff,
                                      D          => is_not_zero_SIG,
                                      Q          => flag_not_zero_SIG);
 
-    Dff_flag_less: D_ff port map(clock       => clock,
+    Dff_flag_less_pm: D_ff port map(clock       => clock,
                                  reset       => reset,
                                  write_en    => update_flag_ff,
                                  D           => is_less_SIG,
