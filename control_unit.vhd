@@ -180,13 +180,14 @@ begin
                                                               (opcode = subt_opcode)) and ULA_out = "0000000000000000") else
                    '1';
 
-    is_less <= '1' when ((opcode = cmp_opcode) and ULA_out = "0000000000000001") else
+    is_less <= '1' when (state_sig = execution_state and ((opcode = cmp_opcode) and ULA_out = "0000000000000001")) else
                '0';
     -----------------------------------------------------------------
 
     not_jump_intruction <= '1' when state_sig = execution_state and ((opcode = load_opcode) or 
                                                                      (opcode = copy_opcode) or 
                                                                      (opcode = add_opcode)  or 
-                                                                     (opcode = subt_opcode)) else
+                                                                     (opcode = subt_opcode) or
+                                                                     (opcode = cmp_opcode)) else
                            '0';                                                    
 end architecture;
