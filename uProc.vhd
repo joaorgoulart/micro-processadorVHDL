@@ -215,7 +215,7 @@ begin
                                      D          => is_not_zero_SIG,
                                      Q          => flag_not_zero_SIG);
 
-    Dff_flag_less_pm: D_ff port map(clock       => clock,
+    Dff_flag_less_pm: D_ff port map(clock    => clock,
                                  reset       => reset,
                                  write_en    => update_flag_ff,
                                  D           => is_less_SIG,
