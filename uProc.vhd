@@ -59,12 +59,12 @@ architecture a_uProc of uProc is
             ULA_selec_op        : out unsigned(1 downto 0);
             PC_data_out         : in unsigned(6 downto 0);
             PC_data_in          : out unsigned(6 downto 0);
-            flag_zero           : std_logic;
-            flag_not_zero       : std_logic;
-            flag_less           : std_logic;
-            is_zero             : std_logic;
-            is_not_zero         : std_logic;
-            is_less             : std_logic;
+            flag_zero           : in std_logic;
+            flag_not_zero       : in std_logic;
+            flag_less           : in std_logic;
+            is_zero             : in std_logic;
+            is_not_zero         : in std_logic;
+            is_less             : in std_logic;
             is_zero_signal      : in std_logic;                                       
             selec_regA          : out unsigned(2 downto 0);
             selec_regB          : out unsigned(2 downto 0);
