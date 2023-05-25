@@ -68,7 +68,7 @@ architecture a_uProc of uProc is
             selec_regA          : out unsigned(2 downto 0);
             selec_regB          : out unsigned(2 downto 0);
             selec_regWrite      : out unsigned(2 downto 0); 
-            not_jump_intruction : in std_logic; 
+            not_jump_intruction : out std_logic; 
             const               : out unsigned(15 downto 0);
             write_en            : out std_logic;
             PC_write_en         : out std_logic

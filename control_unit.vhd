@@ -34,7 +34,7 @@ entity control_unit is
         selec_regB      : out unsigned(2 downto 0);
         selec_regWrite  : out unsigned(2 downto 0); 
 
-        not_jump_intruction : in std_logic; -- Flag used to indicate if current instruction is not a jump instruction, 
+        not_jump_intruction : out std_logic; -- Flag used to indicate if current instruction is not a jump instruction, 
                                             -- if it's not then jump condition flags need to be updated
                                             -- it is used as a write enable for the jump condition flip flops
 
