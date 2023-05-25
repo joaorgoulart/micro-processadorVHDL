@@ -4,88 +4,182 @@ use ieee.numeric_std.all;
 
 entity control_unit is
     port(
-        clk, rst                                : in std_logic;
-        rom_in                                  : in unsigned(15 downto 0);
-        ula_srcB, write_en, PC_wr_en, jump_en   : out std_logic;
-        ula_selec_op                            : out unsigned(1 downto 0)
+        clock : in std_logic;
+        reset : in std_logic;
+        
+        -- ROM Data
+        rom_data : in unsigned(15 downto 0); -- Instruction
+
+        -- ULA Data
+        ULA_out         : in unsigned(15 downto 0); -- Result of past ULA operation
+        ULA_inputB      : out unsigned(15 downto 0); -- Either a constant or register B
+        ULA_selec_op    : out unsigned(1 downto 0); -- Code for ULA operation selection
+
+        PC_data_out : in unsigned(6 downto 0); -- Output data from PC
+        PC_data_in  : out unsigned(6 downto 0); -- Current PC data
+
+        -- Flags for Jump Conditions
+        flag_zero       : std_logic;
+        flag_not_zero   : std_logic;
+        flag_less_equal : std_logic;
+
+         -- Conditions for setting flags
+        is_zero         : std_logic;
+        is_not_zero     : std_logic;
+        is_less_equal   : std_logic;
+
+        -- Register Selection
+        -- registers A & B to get data, and a register to be written                                                        
+        selec_regA      : out unsigned(2 downto 0);
+        selec_regB      : out unsigned(2 downto 0);
+        selec_regWrite  : out unsigned(2 downto 0); 
+
+        not_jump_intruction : in std_logic; -- Flag used to indicate if current instruction is not a jump instruction, 
+                                            -- if it's not then jump condition flags need to be updated
+                                            -- it is used as a write enable for the jump condition flip flops
+
+        const : out unsigned(15 downto 0);
+
+        write_en    : out std_logic;
+        PC_write_en : out std_logic;
     );
 end entity;
 
 architecture a_control_unit of control_unit is
     component state_mach is
         port(
-            clk     : in std_logic;
-            rst     : in std_logic;
+            clock   : in std_logic;
+            reset   : in std_logic;
             state   : out unsigned(1 downto 0)
         );
     end component;
 
-    component T_ff is
-        port(
-            clk     : in std_logic:
-            rst     : in std_logic;
-            state   : out std_logic
-        );
-    end component;
-
     signal opcode       : unsigned(3 downto 0);
-    signal state_sig    : unsigned(1 downto 0);
+    signal state_sig    : unsigned(1 downto 0); 
+    signal jump_address : unsigned(6 downto 0);
+    
+    -- Receives the part of the instruction that indicates the condition for a conditional jump instruction
+    signal jump_condition : unsigned(1 downto 0); 
+    
+    -- Constants for State Codes
+    constant fetch_state        : unsigned(1 downto 0) := "00";
+    constant decode_state       : unsigned(1 downto 0) := "01";
+    constant execution_state    : unsigned(1 downto 0) := "10";
 
-    signal flag_eq_zero, flag_dif_zero, flag_geq : std_logic;
+    -- Constants for opcodes
+    constant load_opcode    : unsigned(3 downto 0) := "0001";   -- MOV <reg>, <value>
+    constant copy_opcode    : unsigned(3 downto 0) := "0010";   -- MOV <reg>, <reg>
+    constant add_opcode     : unsigned(3 downto 0) := "0011";   -- ADD <reg>, <reg>
+    constant sub_opcode     : unsigned(3 downto 0) := "0100";   -- SUB <reg>, <reg>
+    constant jmpa_opcode    : unsigned(3 downto 0) := "1001";   -- JMPA <condition code>, <address>
+    constant jmpr_opcode    : unsigned(3 downto 0) := "1011";   -- JMPR <condition code>, <value>
+    constant jmps_opcode    : unsigned(3 downto 0) := "1111";   -- JMPS <address>
+
+    -- Constants for ULA operations
+    constant sum_operation  : unsigned(1 downto 0) := "00";
+    constant subt_operation : unsigned(1 downto 0) := "01";
+    constant leq_operation  : unsigned(1 downto 0) := "10";
+    constant dif_operation  : unsigned(1 downto 0) := "11";
+
+    -- Constants for Jump Conditions
+    constant equal_zero  : unsigned(1 downto 0) := "01";
+    constant not_zero    : unsigned(1 downto 0) := "10";
+    constant less_equal  : unsigned(1 downto 0) := "11";
+
+    -- Constants for ULA B Input Mux Selection
+    constant selec_const : std_logic := '0';
+    constant selec_regB  : std_logic := '1';
 
 begin 
-    state_mach1: state_mach port map(
-        clk => clk,
-        rst => rst,
+    state_mach: state_mach port map(
+        clock => clock,
+        reset => reset,
         state => state_sig
     );
 
-    ff_eq_zero: T_ff port map(
-        clk => clk,
-        rst => rst,
-        state => flag_eq_zero
-    ); 
-
-    ff_dif_zero: T_ff port map(
-        clk => clk,
-        rst => rst,
-        state => flag_dif_zero
-    );
-
-    ff_geq: T_ff port map(
-        clk => clk,
-        rst => rst,
-        state => flag_geq
-    );
-
-    process(clk, rst, )
-
-    -- Instruction Fetch -> reads ROM when 0, increments PC when 1
-    PC_wr_en <= '1' when state_sig = "00" else 
-                '0';
+    ----------------------------- INSTRUCTION FETCH  -----------------------------
+    
+    -- reads ROM when 0, increments PC when 1
+    PC_write_en <= '1' when state_sig = fetch_state else 
+                   '0';
             
-    -- Instruction Decode -> state_sig == 01
-    opcode <= rom_in(15 downto 12);
-        -- MOV (load constant) opcode = 0001
-        -- MOV (copy) opcode = 0010
-        -- ADD opcode = 0011
-        -- SUB opcode = 0100
-        -- JMPA opcode = 1001
-        -- JMPR opcode = 1011
-        -- JMPS opcode = 1111
-            
-    ula_selec_op <= "00" when opcode = "0001" else
-                    "00" when opcode = "0011" else
-                    "01" when opcode = "0100" else
+    ----------------------------- INSTRUCTION DECODE -----------------------------
+
+    opcode <= rom_data(15 downto 12);
+
+    -- Set condition for jump
+    jump_condition = rom_data(11 downto 10) when (opcode = jmpa_opcode or opcode = jmpr_opcode) else
+                     "00";
+
+    -- Set address for jump
+    -- > absolute and unconditional when JMPS
+    -- > absolute and conditional when JMPA
+    -- > relative and conditional when JMPR
+    jump_address <= rom_data(6 downto 0)                 when (opcode = jmps_opcode or opcode = jmpa_opcode) else
+                    (rom_data(6 downto 0) + PC_data_out) when (opcode = jmpr_opcode)                         else
+                    "0000000";
+    
+    -- Jump Enable will be '1' when there is an unconditional jump opcode or 
+    -- when there is a conditional jump opcode and the proper condition is selected and checked
+    jump_en <= '1' when (opcode = jmps_opcode or (opcode = jmpa_opcode and 
+                                                   ((flag_zero = '1' and jump_condition = equal_zero)   or
+                                                    (flag_not_zero = '1' and jump_condition = not_zero) or
+                                                    (flag_greater_equal = '1' and jump_condition = greater_equal)))) else
+               '0';          
+
+    ULA_selec_op <= sum_operation when opcode = load_opcode else
+                    sum_operation when opcode = add_opcode  else
+                    sub_operation when opcode = sub_opcode  else
                     "00";
 
-    -- Execute -> 1 when 
-    -- jump opcode = "1111", jumps to the jump_address when opcode = "1111"
-    jump_en <= '1' when opcode = "1111" or (opcode "1011" and ) else
-               '0';
-    ula_srcB <= '0' when opcode = "0001" else
-                '1';
-    write_en <= '1' when state_sig = "10" and (opcode = "0001" or opcode="0010" or opcode = "0011" or opcode = "0100") else
+    ----------------------------- INSTRUCTION EXECUTION -----------------------------
+
+    selec_regA <= "000"                 when (opcode = load_opcode or opcode = copy_opcode) else
+                  rom_data(11 downto 9) when (opcode = add_opcode or opcode = sub_opcode)   else 
+                  "000";
+                  
+    selec_regB <= rom_data(8 downto 6) when (opcode = copy_opcode) or 
+                                            (opcode = add_opcode)  or
+                                            (opcode = sub_opcode) else
+                  "000";
+
+    -- Concatenate constant to form 16 bit word for ULA and Register
+    const <= "0000000" & rom_data(8 downto 0) when rom_data(8) = '0' else 
+             "1111111" & rom_data(8 downto 0); 
+
+    selec_regWrite <= rom_data(11 downto 9);
+
+    PC_data_in <= PC_data_out + "0000001"    when jump_en = '0' else
+                  jump_address          when jump_en = '1';
+    
+    ULA_inputB <= selec_const when opcode = load_opcode else
+                  selec_regB;
+
+    write_en <= '1' when state_sig = execution_state and ((opcode = load_opcode) or 
+                                                          (opcode = copy_opcode) or 
+                                                          (opcode = add_opcode)  or 
+                                                          (opcode = sub_opcode)) else
                 '0';
 
+    ----- Setting signals used for setting jump condition flags -----
+    is_zero <= '1' when state_sig = execution_state and ((opcode = load_opcode) or 
+                                                         (opcode = copy_opcode) or 
+                                                         (opcode = add_opcode)  or 
+                                                         (opcode = sub_opcode)) and ULA_out = "0000000000000000" else
+               '0';
+    
+    is_not_zero <= not is_zero_signal;
+
+    is_less_equal <= '1' when state_sig = execution_state and ((opcode = load_opcode) or 
+                                                               (opcode = copy_opcode) or 
+                                                               (opcode = add_opcode)  or 
+                                                               (opcode = sub_opcode)) and ULA_out(15) = '1' else
+                     '0';
+    -----------------------------------------------------------------
+
+    not_jump_intruction <= '1' when state_sig = execution_state and ((opcode = load_opcode) or 
+                                                                     (opcode = copy_opcode) or 
+                                                                     (opcode = add_opcode)  or 
+                                                                     (opcode = sub_opcode)) else
+                            '0';                                                    
 end architecture;

@@ -3,9 +3,9 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity rom is
-    port(clk        : in std_logic;
-         endereco   : in unsigned(6 downto 0);
-         dado       : out unsigned(15 downto 0)
+    port(clock        : in std_logic;
+         address   : in unsigned(6 downto 0);
+         data       : out unsigned(15 downto 0)
     );
 end entity;
 
@@ -39,10 +39,10 @@ architecture a_rom of rom is
         others => (others=>'0')
     );
 begin
-    process(clk)
+    process(clock)
     begin
-        if(rising_edge(clk)) then
-            dado <= conteudo_rom(to_integer(endereco));
+        if(rising_edge(clock)) then
+            data <= conteudo_rom(to_integer(address));
         end if;
     end process;
 end architecture;

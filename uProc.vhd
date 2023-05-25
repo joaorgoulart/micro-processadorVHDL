@@ -4,8 +4,8 @@ use ieee.numeric_std.all;
 
 entity uProc is
     port(
-        clock           : in std_logic;
-        reset           : in std_logic      
+        clock : in std_logic;
+        reset : in std_logic      
     );
 end entity;
 
@@ -14,14 +14,14 @@ architecture a_uProc of uProc is
         port(
             inA         : in unsigned(15 downto 0);
             inB         : in unsigned(15 downto 0);
-            out0        : out unsigned(15 downto 0);
+            data_out    : out unsigned(15 downto 0);
             selec_op    : in unsigned(1 downto 0)
         );
     end component;
 
     component banco_8reg is
         port(
-            data_input		: in unsigned(15 downto 0);
+            data_in 		: in unsigned(15 downto 0);
             selec_regA		: in unsigned(2 downto 0);
             selec_regB		: in unsigned(2 downto 0);
             selec_regWrite  : in unsigned(2 downto 0);
@@ -35,9 +35,9 @@ architecture a_uProc of uProc is
 
     component PC is
         port(
-            clk		    : in std_logic;
-		    rst		    : in std_logic;
-		    wr_en		: in std_logic;
+            clock		: in std_logic;
+		    reset		: in std_logic;
+		    write_en	: in std_logic;
 		    data_in	    : in unsigned(6 downto 0);
 		    data_out	: out unsigned(6 downto 0)
         );
@@ -45,99 +45,157 @@ architecture a_uProc of uProc is
 
     component control_unit is
         port(
-            clk, rst                                : in std_logic;
-            rom_in                                  : in unsigned(15 downto 0);
-            ula_srcB, write_en, PC_wr_en, jump_en   : out std_logic;
-            ula_selec_op                            : out unsigned(1 downto 0)
+            clock               : in std_logic;
+            reset               : in std_logic;
+            rom_data            : in unsigned(15 downto 0);
+            ULA_out             : in unsigned(15 downto 0);
+            ULA_inputB          : out unsigned(15 downto 0);
+            ULA_selec_op        : out unsigned(1 downto 0);
+            PC_data_out         : in unsigned(6 downto 0);
+            PC_data_in          : out unsigned(6 downto 0);
+            flag_zero           : std_logic;
+            flag_not_zero       : std_logic;
+            flag_less_equal     : std_logic;
+            is_zero             : std_logic;
+            is_not_zero         : std_logic;
+            is_less_equal       : std_logic;                                       
+            selec_regA          : out unsigned(2 downto 0);
+            selec_regB          : out unsigned(2 downto 0);
+            selec_regWrite      : out unsigned(2 downto 0); 
+            not_jump_intruction : in std_logic; 
+            const               : out unsigned(15 downto 0);
+            write_en            : out std_logic;
+            PC_write_en         : out std_logic;
         );
     end component;
 
     component rom is
         port(
-            clk        : in std_logic;
-            endereco   : in unsigned(6 downto 0);
-            dado       : out unsigned(15 downto 0)
+            clock     : in std_logic;
+            address   : in unsigned(6 downto 0);
+            data      : out unsigned(15 downto 0)
         );
     end component;
 
     component mux is
         port(
-            inA : in unsigned(15 downto 0);
-            inB : in unsigned(15 downto 0);
-            out0 : out unsigned(15 downto 0);
-            selec : in std_logic
+            inA         : in unsigned(15 downto 0);
+            inB         : in unsigned(15 downto 0);
+            data_out    : out unsigned(15 downto 0);
+            selec       : in std_logic
         );
     end component;
     
-    signal regOutA_ulaA, regOutB_muxA, saida_ula, muxOut_ulaB, const : unsigned(15 downto 0);
-    signal rom_data : unsigned(15 downto 0);
-    signal PC_data_in, PC_data_out, jump_address : unsigned(6 downto 0);
-    signal opcode : unsigned(3 downto 0);
-    signal selec_regA, selec_regB, selec_regWrite : unsigned(2 downto 0);
-    signal selec_oper : unsigned(1 downto 0); 
-    signal ula_srcB, write_en, PC_wr_en, jump_en : std_logic;
-    signal jump_op : unsigned(1 downto 0);
+    ----------------------------- SIGNALS -----------------------------    
+       
+    -- Register File Output Signals
+    -- (Reg File outA -> ULA inA) (Reg File outB -> Mux inA)
+    signal regOutA_ulaA, regOutB_muxA : unsigned(15 downto 0);
+
+    -- Signal for register selection
+    -- (Control Unit -> Register File)
+    signal selec_regA_SIG, selec_regB_SIG, selec_regWrite_SIG : unsigned(2 downto 0);
+
+    -- (Mux output -> ULA inB)
+    signal muxOut_ulaB : unsigned(15 downto 0);
+    
+    -- Constant Signal (Control Unit -> ULA)
+    signal const_SIG : unsigned(15 downto 0);
+
+    -- ROM data signal (ROM -> Control Unit)
+    signal rom_data_SIG : unsigned(15 downto 0);
+
+    -- PC data (PC <-> Control Unit)
+    signal PC_data_in_SIG, PC_data_out_SIG : unsigned(6 downto 0);
+
+    -- Enable signals
+    -- (Control Unit -> Reg File) (Control Unit -> PC) (Control Unit)
+    signal write_en_SIG, PC_write_en_SIG : std_logic;
+
+    -- Flags Flip Flop Signals 
+    signal update_flag_ff : std_logic;
+    signal is_zero_SIG, is_not_zero_SIG, is_less_equal_SIG  : std_logic;
+    signal flag_zero_SIG, flag_not_zero_SIG, flag_less_equal_SIG : std_logic;
+
+    -- Select ULA Operation
+    -- (Control Unit -> ULA)
+    signal ULA_selec_op_SIG : unsigned(1 downto 0); 
+
+    -- Select ULA input B
+    -- (Control Unit -> Mux)
+    signal ULA_inputB_SIG : std_logic;
+
+    signal ULA_output : unsigned(15 downto 0);
 
 begin   
-    ula1: ula port map( inA => regOutA_ulaA, 
-                        inB => muxOut_ulaB, 
-                        out0 => saida_ula, 
-                        selec_op => selec_oper);
+    ula: ula port map(inA       => regOutA_ulaA, 
+                      inB       => muxOut_ulaB, 
+                      data_out  => ULA_output, 
+                      selec_op  => ULA_selec_op_SIG);
 
-    banco_reg1: banco_8reg port map(data_input => saida_ula, 
-                                    selec_regA => selec_regA, 
-                                    selec_regB => selec_regB, 
-                                    selec_regWrite => selec_regWrite, 
-                                    regA_out => regOutA_ulaA,
-                                    regB_out => regOutB_muxA,
-                                    write_en => write_en, 
-                                    clock => clock, 
-                                    reset => reset);    
+    banco_reg: banco_8reg port map(data_input       => ULA_output, 
+                                   selec_regA       => selec_regA_SIG, 
+                                   selec_regB       => selec_regB_SIG, 
+                                   selec_regWrite   => selec_regWrite_SIG, 
+                                   regA_out         => regOutA_ulaA,
+                                   regB_out         => regOutB_muxA,
+                                   write_en         => write_en_SIG, 
+                                   clock            => clock, 
+                                   reset            => reset);    
     
-    PC1: PC port map(clk => clock,
-                     rst => reset,
-                     wr_en => PC_wr_en,
-                     data_in => PC_data_in,
-                     data_out => PC_data_out);
+    PC: PC port map(clock       => clock,
+                    reset       => reset,
+                    write_en    => PC_write_en_SIG,
+                    data_in     => PC_data_in_SIG,
+                    data_out    => PC_data_out_SIG);
                 
-    control_unit1: control_unit port map(clk => clock,
-                                         rst => reset,
-                                         rom_in => rom_data,
-                                         ula_srcB => ula_srcB,
-                                         write_en => write_en,
-                                         PC_wr_en => PC_wr_en,
-                                         jump_en => jump_en,
-                                         ula_selec_op => selec_oper);
+    control_unit: control_unit port map(clock               => clock,
+                                        reset               => reset,
+                                        rom_data            => rom_data_SIG,
+                                        ULA_out             => ULA_output,     
+                                        ULA_inputB          => ULA_inputB_SIG,      
+                                        ULA_selec_op        => ULA_selec_op_SIG,   
+                                        PC_data_out         => PC_data_out_SIG, 
+                                        PC_data_in          => PC_data_in_SIG, 
+                                        flag_zero           => flag_zero_SIG,      
+                                        flag_not_zero       => flag_not_zero_SIG,  
+                                        flag_less_equal     => flag_less_equal_SIG,
+                                        is_zero             => is_zero_SIG,        
+                                        is_not_zero         => is_not_zero_SIG,     
+                                        is_less_equal       => is_not_zero_SIG,                                                    
+                                        selec_regA          => selec_regA_SIG,    
+                                        selec_regB          => selec_regB_SIG,     
+                                        selec_regWrite      => selec_regWrite_SIG, 
+                                        not_jump_intruction => update_flag_ff,
+                                        const               => const_SIG,
+                                        write_en            => write_en_SIG,    
+                                        PC_write_en         => PC_write_en_SIG);
    
-    rom1: rom port map(clk=>clock,
-                       endereco=> PC_data_out,
-                       dado=> rom_data);
+    rom: rom port map(clock     => clock,
+                      address   => PC_data_out_SIG,
+                      data      => rom_data_SIG);
                      
-    mux1: mux port map(inA => const, 
-                      inB => regOutB_muxA, 
-                      out0 => muxOut_ulaB, 
-                      selec => ula_srcB);
+    mux_ULA_inputB: mux port map(inA        => const_SIG, 
+                                 inB        => regOutB_muxA, 
+                                 data_out   => muxOut_ulaB, 
+                                 selec      => ULA_inputB_SIG);
     
-    opcode <= rom_data(15 downto 12);
+    Dff_flag_zero: D_ff port map(clock      => clock,
+                                 reset      => reset,         
+                                 write_en   => update_flag_ff,
+                                 D          => is_zero_SIG,
+                                 Q          => flag_zero_SIG);
 
-    jump_op <= rom_data(11 downto 10) when (opcode = "1001" or opcode = "1011") else
-               "00";
+    Dff_flag_not_zero: D_ff port map(clock      => clock,
+                                     reset      => reset, 
+                                     write_en   => update_flag_ff,
+                                     D          => is_not_zero_SIG,
+                                     Q          => flag_not_zero_SIG);
 
-    
-    
-
-    selec_regA <= "000" when opcode = "0001" or opcode = "0010" else
-                  rom_data(11 downto 9) when opcode = "0011" or opcode = "0100" else "000";
-    selec_regB <= rom_data(8 downto 6) when opcode = "0010" or opcode = "0011" or opcode = "0100" else
-                  "000";
-
-    selec_regWrite <= rom_data(11 downto 9);
-
-    const <= "0000000" & rom_data(8 downto 0) when rom_data(8) = '0' else "1111111" & rom_data(8 downto 0); 
-    
-    jump_address <= rom_data(6 downto 0);
-
-    PC_data_in <= PC_data_out + "0000001" when jump_en = '0' else
-                  jump_address;
+    Dff_flag_leq: D_ff port map(clock       => clock,
+                                reset       => reset,
+                                write_en    => update_flag_ff,
+                                D           => is_less_equal_SIG,
+                                Q           => flag_less_equal_SIG);
 
 end architecture;    
