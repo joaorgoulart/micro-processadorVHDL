@@ -19,14 +19,16 @@ entity control_unit is
         PC_data_in  : out unsigned(6 downto 0); -- Current PC data
 
         -- Flags for Jump Conditions
-        flag_zero       : std_logic;
-        flag_not_zero   : std_logic;
-        flag_less_equal : std_logic;
+        flag_zero       : in std_logic;
+        flag_not_zero   : in std_logic;
+        flag_less       : in std_logic;
 
-         -- Conditions for setting flags
-        is_zero         : std_logic;
-        is_not_zero     : std_logic;
-        is_less_equal   : std_logic;
+        -- Conditions for setting flags
+        is_zero         : in std_logic;
+        is_not_zero     : in std_logic;
+        is_less         : in std_logic;
+
+        is_zero_signal  : in std_logic;
 
         -- Register Selection
         -- registers A & B to get data, and a register to be written                                                        
@@ -37,6 +39,8 @@ entity control_unit is
         not_jump_intruction : in std_logic; -- Flag used to indicate if current instruction is not a jump instruction, 
                                             -- if it's not then jump condition flags need to be updated
                                             -- it is used as a write enable for the jump condition flip flops
+
+        carry_subt  : in std_logic;
 
         const : out unsigned(15 downto 0);
 
@@ -78,15 +82,15 @@ architecture a_control_unit of control_unit is
     -- Constants for ULA operations
     constant sum_operation  : unsigned(1 downto 0) := "00";
     constant subt_operation : unsigned(1 downto 0) := "01";
-    constant leq_operation  : unsigned(1 downto 0) := "10";
+    constant less_operation : unsigned(1 downto 0) := "10";
     constant dif_operation  : unsigned(1 downto 0) := "11";
 
     -- Constants for Jump Conditions
     constant equal_zero  : unsigned(1 downto 0) := "01";
     constant not_zero    : unsigned(1 downto 0) := "10";
-    constant less_equal  : unsigned(1 downto 0) := "11";
+    constant less        : unsigned(1 downto 0) := "11";
 
-    -- Constants for ULA B Input Mux Selection
+    -- Constants for ULA InputB Mux Selection
     constant selec_const : std_logic := '0';
     constant selec_regB  : std_logic := '1';
 
@@ -121,10 +125,10 @@ begin
     
     -- Jump Enable will be '1' when there is an unconditional jump opcode or 
     -- when there is a conditional jump opcode and the proper condition is selected and checked
-    jump_en <= '1' when (opcode = jmps_opcode or (opcode = jmpa_opcode and 
+    jump_en <= '1' when (opcode = jmps_opcode or ((opcode = jmpa_opcode or opcode = jmpr_opcode) and 
                                                    ((flag_zero = '1' and jump_condition = equal_zero)   or
                                                     (flag_not_zero = '1' and jump_condition = not_zero) or
-                                                    (flag_greater_equal = '1' and jump_condition = greater_equal)))) else
+                                                    (flag_less = '1' and jump_condition = less)))) else
                '0';          
 
     ULA_selec_op <= sum_operation when opcode = load_opcode else
@@ -143,14 +147,14 @@ begin
                                             (opcode = sub_opcode) else
                   "000";
 
-    -- Concatenate constant to form 16 bit word for ULA and Register
+    -- Concatenate constant to form 16 bit word for ULA
     const <= "0000000" & rom_data(8 downto 0) when rom_data(8) = '0' else 
              "1111111" & rom_data(8 downto 0); 
 
     selec_regWrite <= rom_data(11 downto 9);
 
-    PC_data_in <= PC_data_out + "0000001"    when jump_en = '0' else
-                  jump_address          when jump_en = '1';
+    PC_data_in <= PC_data_out + "0000001"   when jump_en = '0' else
+                  jump_address              when jump_en = '1';
     
     ULA_inputB <= selec_const when opcode = load_opcode else
                   selec_regB;
@@ -170,16 +174,16 @@ begin
     
     is_not_zero <= not is_zero_signal;
 
-    is_less_equal <= '1' when state_sig = execution_state and ((opcode = load_opcode) or 
-                                                               (opcode = copy_opcode) or 
-                                                               (opcode = add_opcode)  or 
-                                                               (opcode = sub_opcode)) and ULA_out(15) = '1' else
-                     '0';
+    is_less <= '1' when state_sig = execution_state and ((opcode = load_opcode) or 
+                                                         (opcode = copy_opcode) or 
+                                                         (opcode = add_opcode)  or 
+                                                         (opcode = sub_opcode)) and carry_subt = '1' else
+               '0';
     -----------------------------------------------------------------
 
     not_jump_intruction <= '1' when state_sig = execution_state and ((opcode = load_opcode) or 
                                                                      (opcode = copy_opcode) or 
                                                                      (opcode = add_opcode)  or 
                                                                      (opcode = sub_opcode)) else
-                            '0';                                                    
+                           '0';                                                    
 end architecture;

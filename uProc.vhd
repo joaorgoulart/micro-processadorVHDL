@@ -5,7 +5,11 @@ use ieee.numeric_std.all;
 entity uProc is
     port(
         clock : in std_logic;
-        reset : in std_logic      
+        reset : in std_logic;
+        
+        PC_out_data     : out unsigned(6 downto 0);
+        rom_data        : out unsigned(15 downto 0);
+        ULA_out_data    : out unsigned(15 downto 0);
     );
 end entity;
 
@@ -15,7 +19,9 @@ architecture a_uProc of uProc is
             inA         : in unsigned(15 downto 0);
             inB         : in unsigned(15 downto 0);
             data_out    : out unsigned(15 downto 0);
-            selec_op    : in unsigned(1 downto 0)
+            selec_op    : in unsigned(1 downto 0);
+            carry_sum   : out std_logic;
+            carry_subt  : out std_logic;
         );
     end component;
 
@@ -55,14 +61,15 @@ architecture a_uProc of uProc is
             PC_data_in          : out unsigned(6 downto 0);
             flag_zero           : std_logic;
             flag_not_zero       : std_logic;
-            flag_less_equal     : std_logic;
+            flag_less           : std_logic;
             is_zero             : std_logic;
             is_not_zero         : std_logic;
-            is_less_equal       : std_logic;                                       
+            is_less             : std_logic;                                       
             selec_regA          : out unsigned(2 downto 0);
             selec_regB          : out unsigned(2 downto 0);
             selec_regWrite      : out unsigned(2 downto 0); 
             not_jump_intruction : in std_logic; 
+            is_not_zero_signal  : in std_logic;
             const               : out unsigned(15 downto 0);
             write_en            : out std_logic;
             PC_write_en         : out std_logic;
@@ -114,8 +121,8 @@ architecture a_uProc of uProc is
 
     -- Flags Flip Flop Signals 
     signal update_flag_ff : std_logic;
-    signal is_zero_SIG, is_not_zero_SIG, is_less_equal_SIG  : std_logic;
-    signal flag_zero_SIG, flag_not_zero_SIG, flag_less_equal_SIG : std_logic;
+    signal is_zero_SIG, is_not_zero_SIG, is_less_SIG  : std_logic;
+    signal flag_zero_SIG, flag_not_zero_SIG, flag_less_SIG : std_logic;
 
     -- Select ULA Operation
     -- (Control Unit -> ULA)
@@ -127,11 +134,16 @@ architecture a_uProc of uProc is
 
     signal ULA_output : unsigned(15 downto 0);
 
+    signal carry_subt_SIG   : std_logic;
+    signal carry_sum_SIG    : std_logic;
+
 begin   
-    ula: ula port map(inA       => regOutA_ulaA, 
-                      inB       => muxOut_ulaB, 
-                      data_out  => ULA_output, 
-                      selec_op  => ULA_selec_op_SIG);
+    ula: ula port map(inA           => regOutA_ulaA, 
+                      inB           => muxOut_ulaB, 
+                      data_out      => ULA_output, 
+                      selec_op      => ULA_selec_op_SIG,
+                      carry_sum     => carry_sum_SIG,
+                      carry_subt    => carry_subt_SIG);
 
     banco_reg: banco_8reg port map(data_input       => ULA_output, 
                                    selec_regA       => selec_regA_SIG, 
@@ -159,10 +171,11 @@ begin
                                         PC_data_in          => PC_data_in_SIG, 
                                         flag_zero           => flag_zero_SIG,      
                                         flag_not_zero       => flag_not_zero_SIG,  
-                                        flag_less_equal     => flag_less_equal_SIG,
+                                        flag_less           => flag_less_SIG,
                                         is_zero             => is_zero_SIG,        
                                         is_not_zero         => is_not_zero_SIG,     
-                                        is_less_equal       => is_not_zero_SIG,                                                    
+                                        is_less             => is_less_SIG,
+                                        is_zero_signal      => is_zero_SIG                                                    
                                         selec_regA          => selec_regA_SIG,    
                                         selec_regB          => selec_regB_SIG,     
                                         selec_regWrite      => selec_regWrite_SIG, 
@@ -192,10 +205,14 @@ begin
                                      D          => is_not_zero_SIG,
                                      Q          => flag_not_zero_SIG);
 
-    Dff_flag_leq: D_ff port map(clock       => clock,
-                                reset       => reset,
-                                write_en    => update_flag_ff,
-                                D           => is_less_equal_SIG,
-                                Q           => flag_less_equal_SIG);
+    Dff_flag_less: D_ff port map(clock       => clock,
+                                 reset       => reset,
+                                 write_en    => update_flag_ff,
+                                 D           => is_less_SIG,
+                                 Q           => flag_less_SIG);
+          
+    PC_out_data <= PC_data_out_SIG;
+    rom_data <= rom_data_SIG;    
+    ULA_out_data <= ULA_output;    
 
 end architecture;    

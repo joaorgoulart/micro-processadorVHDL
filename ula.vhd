@@ -25,7 +25,7 @@ architecture a_ula of ula is
         );
     end component;
 
-	signal sum_op, subt_op, leq_op, dif_op : unsigned(16 downto 0);
+	signal sum_op, subt_op, less_op, dif_op : unsigned(16 downto 0);
 
     constant ZERO: unsigned(16 downto 0) := "00000000000000000";
     constant ONE: unsigned(16 downto 0) := "00000000000000001"
@@ -35,7 +35,7 @@ architecture a_ula of ula is
             selec => selec_op,
             inA => sum_op(15 downto 0),
             inB => subt_op(15 downto 0),
-            inC => leq_op(15 downto 0),
+            inC => less_op(15 downto 0),
             inD => dif_op(15 downto 0),
             data_out => data_out
         );
@@ -44,14 +44,14 @@ architecture a_ula of ula is
             
         --  inA + inB   00
         --  inA - inB   01
-        --  inA <= inB  10
+        --  inA < inB  10
         --  inA /= inB  11
 
         sum_op <= ('0' & inA) + ('0' & inB);
         
         subt_op <= ('0' & inA) - ('0' & inB);
 
-        leq_op <= ONE when (('0' & inA) <= ('0' & inB)) else ZERO;
+        less_op <= ONE when (('0' & inA) < ('0' & inB)) else ZERO;
 
         dif_op <= ONE when (('0' & inA) /= ('0' & inB)) else ZERO;
 

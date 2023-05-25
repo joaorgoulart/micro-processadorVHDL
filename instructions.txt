@@ -38,7 +38,7 @@ Desvio condicional:
 	Condição	Código
 	= 0			01
 	/= 0		10
-	<=			11
+	<			11
 
 	<endereço>: endereço absoluto para o qual será feito o desvio;
 
@@ -52,7 +52,7 @@ Desvio condicional:
 	Condição	Código
 	= 0			01
 	/= 0		10
-	<=			11
+	<			11
 
 	<endereço>: endereço relativo para o qual será feito o desvio;
 
