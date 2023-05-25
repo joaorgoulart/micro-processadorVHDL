@@ -74,6 +74,7 @@ architecture a_control_unit of control_unit is
     constant copy_opcode    : unsigned(3 downto 0) := "0010";   -- MOV <reg>, <reg>
     constant add_opcode     : unsigned(3 downto 0) := "0011";   -- ADD <reg>, <reg>
     constant subt_opcode    : unsigned(3 downto 0) := "0100";   -- SUB <reg>, <reg>
+    constant cmp_opcode     : unsigned(3 downto 0) := "0101";   -- CMP <reg>, <reg>
     constant jmpa_opcode    : unsigned(3 downto 0) := "1001";   -- JMPA <condition code>, <address>
     constant jmpr_opcode    : unsigned(3 downto 0) := "1011";   -- JMPR <condition code>, <value>
     constant jmps_opcode    : unsigned(3 downto 0) := "1111";   -- JMPS <address>
@@ -133,17 +134,19 @@ begin
     ULA_selec_op <= sum_operation when opcode = load_opcode else
                     sum_operation when opcode = add_opcode  else
                     subt_operation when opcode = subt_opcode  else
+                    less_operation when opcode = cmp_opcode else
                     "00";
 
     ----------------------------- INSTRUCTION EXECUTION -----------------------------
 
-    selec_regA <= "000"                 when (opcode = load_opcode or opcode = copy_opcode) else
-                  rom_data(11 downto 9) when (opcode = add_opcode or opcode = subt_opcode)   else 
+    selec_regA <= "000"                 when (opcode = load_opcode or opcode = copy_opcode)                         else
+                  rom_data(11 downto 9) when (opcode = add_opcode or opcode = subt_opcode or opcode = cmp_opcode)   else 
                   "000";
                   
     selec_regB <= rom_data(8 downto 6) when (opcode = copy_opcode) or 
                                             (opcode = add_opcode)  or
-                                            (opcode = subt_opcode) else
+                                            (opcode = subt_opcode) or
+                                            (opcode = cmp_opcode) else
                   "000";
 
     -- Concatenate constant to form 16 bit word for ULA
@@ -177,10 +180,7 @@ begin
                                                               (opcode = subt_opcode)) and ULA_out = "0000000000000000") else
                    '1';
 
-    is_less <= '1' when (state_sig = execution_state and ((opcode = load_opcode) or 
-                                                         (opcode = copy_opcode) or 
-                                                         (opcode = add_opcode)  or 
-                                                         (opcode = subt_opcode)) and carry_subt = '1') else
+    is_less <= '1' when (state_sig = execution_state and ((opcode = cmp_opcode) and carry_subt = '1')) else
                '0';
     -----------------------------------------------------------------
 

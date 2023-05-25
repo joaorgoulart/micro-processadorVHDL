@@ -28,6 +28,11 @@ Subtração de dois valores:
 	
 	A instrução SUB subtrai o valor do destino.
 
+
+Comparar dois valores
+	CMP <reg>, <reg>
+	opcode: 0101
+
 Desvio condicional:
 
 	Desvio Absoluto:
