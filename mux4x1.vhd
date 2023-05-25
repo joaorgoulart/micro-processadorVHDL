@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity mux is
+entity mux4x1 is
     port(
         selec    : in unsigned(1 downto 0);
         inA      : in unsigned(15 downto 0);
@@ -13,7 +13,7 @@ entity mux is
     );
 end entity;
 
-architecture a_mux of mux is
+architecture a_mux4x1 of mux4x1 is
 begin
     data_out <= inA when selec="00" else
                 inB when selec="01" else

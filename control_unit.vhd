@@ -45,7 +45,7 @@ entity control_unit is
         const : out unsigned(15 downto 0);
 
         write_en    : out std_logic;
-        PC_write_en : out std_logic;
+        PC_write_en : out std_logic
     );
 end entity;
 
@@ -112,7 +112,7 @@ begin
     opcode <= rom_data(15 downto 12);
 
     -- Set condition for jump
-    jump_condition = rom_data(11 downto 10) when (opcode = jmpa_opcode or opcode = jmpr_opcode) else
+    jump_condition <= rom_data(11 downto 10) when (opcode = jmpa_opcode or opcode = jmpr_opcode) else
                      "00";
 
     -- Set address for jump

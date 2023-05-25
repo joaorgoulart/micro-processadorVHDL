@@ -9,7 +9,7 @@ entity uProc is
         
         PC_out_data     : out unsigned(6 downto 0);
         rom_data        : out unsigned(15 downto 0);
-        ULA_out_data    : out unsigned(15 downto 0);
+        ULA_out_data    : out unsigned(15 downto 0)
     );
 end entity;
 
@@ -21,7 +21,7 @@ architecture a_uProc of uProc is
             data_out    : out unsigned(15 downto 0);
             selec_op    : in unsigned(1 downto 0);
             carry_sum   : out std_logic;
-            carry_subt  : out std_logic;
+            carry_subt  : out std_logic
         );
     end component;
 
@@ -72,7 +72,7 @@ architecture a_uProc of uProc is
             is_not_zero_signal  : in std_logic;
             const               : out unsigned(15 downto 0);
             write_en            : out std_logic;
-            PC_write_en         : out std_logic;
+            PC_write_en         : out std_logic
         );
     end component;
 
@@ -175,7 +175,7 @@ begin
                                         is_zero             => is_zero_SIG,        
                                         is_not_zero         => is_not_zero_SIG,     
                                         is_less             => is_less_SIG,
-                                        is_zero_signal      => is_zero_SIG                                                    
+                                        is_zero_signal      => is_zero_SIG,                                                    
                                         selec_regA          => selec_regA_SIG,    
                                         selec_regB          => selec_regB_SIG,     
                                         selec_regWrite      => selec_regWrite_SIG, 

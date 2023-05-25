@@ -4,12 +4,12 @@ use ieee.numeric_std.all;
 
 entity ula is
     port(
-        selec_op    : in unsigned(1 downto 0)    
+        selec_op    : in unsigned(1 downto 0);    
         inA         : in unsigned(15 downto 0);
         inB         : in unsigned(15 downto 0);
         data_out    : out unsigned(15 downto 0);
         carry_sum   : out std_logic;
-        carry_subt  : out std_logic;
+        carry_subt  : out std_logic
     );
 end entity;
 
@@ -28,7 +28,7 @@ architecture a_ula of ula is
 	signal sum_op, subt_op, less_op, dif_op : unsigned(16 downto 0);
 
     constant ZERO: unsigned(16 downto 0) := "00000000000000000";
-    constant ONE: unsigned(16 downto 0) := "00000000000000001"
+    constant ONE: unsigned(16 downto 0) := "00000000000000001";
 	
     begin
         mux: mux4x1 port map(

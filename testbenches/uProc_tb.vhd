@@ -13,7 +13,7 @@ architecture a_uProc_tb of uProc_tb is
 
 			PC_out_data     : out unsigned(6 downto 0);
         	rom_data        : out unsigned(15 downto 0);
-        	ULA_out_data    : out unsigned(15 downto 0);
+        	ULA_out_data    : out unsigned(15 downto 0)
             );
     end component;
     
