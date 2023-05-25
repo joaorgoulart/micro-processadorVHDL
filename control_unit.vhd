@@ -24,11 +24,9 @@ entity control_unit is
         flag_less       : in std_logic;
 
         -- Conditions for setting flags
-        is_zero         : in std_logic;
-        is_not_zero     : in std_logic;
-        is_less         : in std_logic;
-
-        is_zero_signal  : in std_logic;
+        is_zero         : out std_logic;
+        is_not_zero     : out std_logic;
+        is_less         : out std_logic;
 
         -- Register Selection
         -- registers A & B to get data, and a register to be written                                                        
@@ -173,7 +171,11 @@ begin
                                                          (opcode = subt_opcode)) and ULA_out = "0000000000000000") else
                '0';
     
-    is_not_zero <= not is_zero_signal;
+    is_not_zero <= '0' when (state_sig = execution_state and ((opcode = load_opcode) or 
+                                                              (opcode = copy_opcode) or 
+                                                              (opcode = add_opcode)  or 
+                                                              (opcode = subt_opcode)) and ULA_out = "0000000000000000") else
+                   '1';
 
     is_less <= '1' when (state_sig = execution_state and ((opcode = load_opcode) or 
                                                          (opcode = copy_opcode) or 

@@ -62,10 +62,9 @@ architecture a_uProc of uProc is
             flag_zero           : in std_logic;
             flag_not_zero       : in std_logic;
             flag_less           : in std_logic;
-            is_zero             : in std_logic;
-            is_not_zero         : in std_logic;
-            is_less             : in std_logic;
-            is_zero_signal      : in std_logic;                                       
+            is_zero             : out std_logic;
+            is_not_zero         : out std_logic;
+            is_less             : out std_logic;                                      
             selec_regA          : out unsigned(2 downto 0);
             selec_regB          : out unsigned(2 downto 0);
             selec_regWrite      : out unsigned(2 downto 0); 
@@ -184,8 +183,7 @@ begin
                                         flag_less           => flag_less_SIG,
                                         is_zero             => is_zero_SIG,        
                                         is_not_zero         => is_not_zero_SIG,     
-                                        is_less             => is_less_SIG,
-                                        is_zero_signal      => is_zero_SIG,                                                    
+                                        is_less             => is_less_SIG,                                                    
                                         selec_regA          => selec_regA_SIG,    
                                         selec_regB          => selec_regB_SIG,     
                                         selec_regWrite      => selec_regWrite_SIG, 
