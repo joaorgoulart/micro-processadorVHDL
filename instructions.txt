@@ -33,6 +33,10 @@ Comparar dois valores
 	CMP <reg>, <reg>
 	opcode: 0101
 
+	inA < inB
+
+	A instrucão CMP compara o valor do primeiro registrador com o valor do segundo sem alterar o valor dos registradores. Se o primeiro for menor que o segundo a saída da ULA será 1.
+
 Desvio condicional:
 
 	Desvio Absoluto:
