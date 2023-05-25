@@ -100,7 +100,8 @@ architecture a_uProc of uProc is
             write_en    : in std_logic;
             D           : in std_logic;
             Q           : out std_logic
-        )
+        );
+    end component;
     
     ----------------------------- SIGNALS -----------------------------    
        
