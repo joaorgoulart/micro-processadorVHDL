@@ -27,7 +27,7 @@ architecture a_uProc of uProc is
 
     component banco_8reg is
         port(
-            data_in 		: in unsigned(15 downto 0);
+            data_input 		: in unsigned(15 downto 0);
             selec_regA		: in unsigned(2 downto 0);
             selec_regB		: in unsigned(2 downto 0);
             selec_regWrite  : in unsigned(2 downto 0);
@@ -64,12 +64,12 @@ architecture a_uProc of uProc is
             flag_less           : std_logic;
             is_zero             : std_logic;
             is_not_zero         : std_logic;
-            is_less             : std_logic;                                       
+            is_less             : std_logic;
+            is_zero_signal      : in std_logic;                                       
             selec_regA          : out unsigned(2 downto 0);
             selec_regB          : out unsigned(2 downto 0);
             selec_regWrite      : out unsigned(2 downto 0); 
             not_jump_intruction : in std_logic; 
-            is_not_zero_signal  : in std_logic;
             const               : out unsigned(15 downto 0);
             write_en            : out std_logic;
             PC_write_en         : out std_logic
@@ -92,6 +92,15 @@ architecture a_uProc of uProc is
             selec       : in std_logic
         );
     end component;
+
+    component D_ff is
+        port(
+            clock       : in std_logic;
+            reset       : in std_logic;
+            write_en    : in std_logic;
+            D           : in std_logic;
+            Q           : out std_logic
+        )
     
     ----------------------------- SIGNALS -----------------------------    
        
