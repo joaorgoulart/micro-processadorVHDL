@@ -189,7 +189,7 @@ begin
                                         selec_regB          => selec_regB_SIG,     
                                         selec_regWrite      => selec_regWrite_SIG, 
                                         not_jump_intruction => update_flag_ff,
-                                        carry_subt          => carry_subt_SIG
+                                        carry_subt          => carry_subt_SIG,
                                         const               => const_SIG,
                                         write_en            => write_en_SIG,    
                                         PC_write_en         => PC_write_en_SIG);
