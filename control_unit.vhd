@@ -17,6 +17,8 @@ entity control_unit is
 
         selec_regFile_input : out std_logic;
 
+        regB_out : in unsigned(15 downto 0);
+
         -- ULA Data
         ULA_out         : in unsigned(15 downto 0); -- Result of past ULA operation
         ULA_inputB      : out std_logic; -- Either a constant or register B
@@ -122,10 +124,10 @@ begin
     opcode <= rom_data(15 downto 12);
 
     ram_address <= rom_data(11 downto 5) when (opcode = loadRAM_opcode) else
-                   reg_out when (opcode = readRAM_opcode) else
+                   regB_out when (opcode = readRAM_opcode) else
                    "0000000";
 
-    ram_data_in <= reg_out when (opcode = loadRAM_opcode) else
+    ram_data_in <= regB_out when (opcode = loadRAM_opcode) else
                    "0000000000000000";
 
     -- Set condition for jump

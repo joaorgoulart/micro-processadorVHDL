@@ -58,6 +58,7 @@ architecture a_uProc of uProc is
             ram_address         : out unsigned(6 downto 0);
             ram_write_en        : out std_logic;
             selec_regFile_input : out std_logic;
+            regB_out            : in unsigned(15 downto 0);
             ULA_out             : in unsigned(15 downto 0);
             ULA_inputB          : out std_logic;
             ULA_selec_op        : out unsigned(1 downto 0);
@@ -96,6 +97,7 @@ architecture a_uProc of uProc is
             data_in     : in unsigned (15 downto 0);
             data_out    : out unsigned (15 downto 0)
         );
+    end component;
 
     component mux is
         port(
@@ -120,7 +122,7 @@ architecture a_uProc of uProc is
        
     -- Register File Output Signals
     -- (Reg File outA -> ULA inA) (Reg File outB -> Mux inA)
-    signal regOutA_ulaA, regOutB_muxA : unsigned(15 downto 0);
+    signal regOutA_ulaA, regOutB_SIG : unsigned(15 downto 0);
 
     -- Signal for register selection
     -- (Control Unit -> Register File)
@@ -181,7 +183,7 @@ begin
                                       selec_regB       => selec_regB_SIG, 
                                       selec_regWrite   => selec_regWrite_SIG, 
                                       regA_out         => regOutA_ulaA,
-                                      regB_out         => regOutB_muxA,
+                                      regB_out         => regOutB_SIG,
                                       write_en         => write_en_SIG, 
                                       clock            => clock, 
                                       reset            => reset);    
@@ -199,6 +201,7 @@ begin
                                            ram_address         => ram_address_SIG,
                                            ram_write_en        => ram_write_en_SIG,
                                            selec_regFile_input => selec_regFile_input_SIG,
+                                           regB_out            => regOutB_SIG
                                            ULA_out             => ULA_output,     
                                            ULA_inputB          => ULA_inputB_SIG,      
                                            ULA_selec_op        => ULA_selec_op_SIG,   
@@ -230,7 +233,7 @@ begin
                          data_out   => ram_data_out_SIG);
                      
     mux_ULA_inputB_pm: mux port map(inA        => const_SIG, 
-                                    inB        => regOutB_muxA, 
+                                    inB        => regOutB_SIG, 
                                     data_out   => muxOut_ulaB, 
                                     selec      => ULA_inputB_SIG);
 
