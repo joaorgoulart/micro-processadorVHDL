@@ -54,6 +54,10 @@ architecture a_uProc of uProc is
             clock               : in std_logic;
             reset               : in std_logic;
             rom_data            : in unsigned(15 downto 0);
+            ram_data_in         : out unsigned(15 downto 0);
+            ram_address         : out unsigned(6 downto 0);
+            ram_write_en        : out std_logic;
+            selec_regFile_input : out std_logic;
             ULA_out             : in unsigned(15 downto 0);
             ULA_inputB          : out std_logic;
             ULA_selec_op        : out unsigned(1 downto 0);
@@ -83,6 +87,15 @@ architecture a_uProc of uProc is
             data      : out unsigned(15 downto 0)
         );
     end component;
+
+    component ram is
+        port(
+            clock       : in std_logic;
+            write_en    : in std_logic;
+            address     : in unsigned (6 downto 0);
+            data_in     : in unsigned (15 downto 0);
+            data_out    : out unsigned (15 downto 0)
+        );
 
     component mux is
         port(
@@ -122,6 +135,14 @@ architecture a_uProc of uProc is
     -- ROM data signal (ROM -> Control Unit)
     signal rom_data_SIG : unsigned(15 downto 0);
 
+    -- RAM data signals
+    signal ram_write_en_SIG : std_logic;
+    signal ram_data_in_SIG  : unsigned(15 downto 0);
+    signal ram_data_out_SIG : unsigned(15 downto 0);
+    signal ram_address_SIG  : unsigned(6 downto 0);
+
+    signal regFile_input : unsigned(15 downto 0);
+
     -- PC data (PC <-> Control Unit)
     signal PC_data_in_SIG, PC_data_out_SIG : unsigned(6 downto 0);
 
@@ -149,77 +170,92 @@ architecture a_uProc of uProc is
 
 begin   
     ula_pm: ula port map(inA           => regOutA_ulaA, 
-                      inB           => muxOut_ulaB, 
-                      data_out      => ULA_output, 
-                      selec_op      => ULA_selec_op_SIG,
-                      carry_sum     => carry_sum_SIG,
-                      carry_subt    => carry_subt_SIG);
+                         inB           => muxOut_ulaB, 
+                         data_out      => ULA_output, 
+                         selec_op      => ULA_selec_op_SIG,
+                         carry_sum     => carry_sum_SIG,
+                         carry_subt    => carry_subt_SIG);
 
-    banco_reg_pm: banco_8reg port map(data_input       => ULA_output, 
-                                   selec_regA       => selec_regA_SIG, 
-                                   selec_regB       => selec_regB_SIG, 
-                                   selec_regWrite   => selec_regWrite_SIG, 
-                                   regA_out         => regOutA_ulaA,
-                                   regB_out         => regOutB_muxA,
-                                   write_en         => write_en_SIG, 
-                                   clock            => clock, 
-                                   reset            => reset);    
+    banco_reg_pm: banco_8reg port map(data_input       => regFile_input, 
+                                      selec_regA       => selec_regA_SIG, 
+                                      selec_regB       => selec_regB_SIG, 
+                                      selec_regWrite   => selec_regWrite_SIG, 
+                                      regA_out         => regOutA_ulaA,
+                                      regB_out         => regOutB_muxA,
+                                      write_en         => write_en_SIG, 
+                                      clock            => clock, 
+                                      reset            => reset);    
     
     PC_pm: PC port map(clock       => clock,
-                    reset       => reset,
-                    write_en    => PC_write_en_SIG,
-                    data_in     => PC_data_in_SIG,
-                    data_out    => PC_data_out_SIG);
+                       reset       => reset,
+                       write_en    => PC_write_en_SIG,
+                       data_in     => PC_data_in_SIG,
+                       data_out    => PC_data_out_SIG);
                 
     control_unit_pm: control_unit port map(clock               => clock,
-                                        reset               => reset,
-                                        rom_data            => rom_data_SIG,
-                                        ULA_out             => ULA_output,     
-                                        ULA_inputB          => ULA_inputB_SIG,      
-                                        ULA_selec_op        => ULA_selec_op_SIG,   
-                                        PC_data_out         => PC_data_out_SIG, 
-                                        PC_data_in          => PC_data_in_SIG, 
-                                        flag_zero           => flag_zero_SIG,      
-                                        flag_not_zero       => flag_not_zero_SIG,  
-                                        flag_less           => flag_less_SIG,
-                                        is_zero             => is_zero_SIG,        
-                                        is_not_zero         => is_not_zero_SIG,     
-                                        is_less             => is_less_SIG,                                                    
-                                        selec_regA          => selec_regA_SIG,    
-                                        selec_regB          => selec_regB_SIG,     
-                                        selec_regWrite      => selec_regWrite_SIG, 
-                                        not_jump_intruction => update_flag_ff,
-                                        carry_subt          => carry_subt_SIG,
-                                        const               => const_SIG,
-                                        write_en            => write_en_SIG,    
-                                        PC_write_en         => PC_write_en_SIG);
+                                           reset               => reset,
+                                           rom_data            => rom_data_SIG,
+                                           ram_data_in         => ram_data_in_SIG,
+                                           ram_address         => ram_address_SIG,
+                                           ram_write_en        => ram_write_en_SIG,
+                                           selec_regFile_input => selec_regFile_input_SIG,
+                                           ULA_out             => ULA_output,     
+                                           ULA_inputB          => ULA_inputB_SIG,      
+                                           ULA_selec_op        => ULA_selec_op_SIG,   
+                                           PC_data_out         => PC_data_out_SIG, 
+                                           PC_data_in          => PC_data_in_SIG, 
+                                           flag_zero           => flag_zero_SIG,      
+                                           flag_not_zero       => flag_not_zero_SIG,  
+                                           flag_less           => flag_less_SIG,
+                                           is_zero             => is_zero_SIG,        
+                                           is_not_zero         => is_not_zero_SIG,     
+                                           is_less             => is_less_SIG,                                                    
+                                           selec_regA          => selec_regA_SIG,    
+                                           selec_regB          => selec_regB_SIG,     
+                                           selec_regWrite      => selec_regWrite_SIG, 
+                                           not_jump_intruction => update_flag_ff,
+                                           carry_subt          => carry_subt_SIG,
+                                           const               => const_SIG,
+                                           write_en            => write_en_SIG,    
+                                           PC_write_en         => PC_write_en_SIG);
    
     rom_pm: rom port map(clock     => clock,
-                      address   => PC_data_out_SIG,
-                      data      => rom_data_SIG);
+                         address   => PC_data_out_SIG,
+                         data      => rom_data_SIG);
+
+    ram_pm: ram port map(clock      => clock,
+                         write_en   => ram_write_en_SIG,
+                         address    => ram_address_SIG,
+                         data_in    => ram_data_in_SIG,
+                         data_out   => ram_data_out_SIG);
                      
     mux_ULA_inputB_pm: mux port map(inA        => const_SIG, 
-                                 inB        => regOutB_muxA, 
-                                 data_out   => muxOut_ulaB, 
-                                 selec      => ULA_inputB_SIG);
+                                    inB        => regOutB_muxA, 
+                                    data_out   => muxOut_ulaB, 
+                                    selec      => ULA_inputB_SIG);
+
+    mux_regFile_data_input_pm: mux port map(inA         => ULA_output,
+                                            inB         => ram_data_out_SIG,
+                                            data_out    => regFile_input,
+                                            selec       => selec_regFile_input_SIG);
     
     Dff_flag_zero_pm: D_ff port map(clock      => clock,
-                                 reset      => reset,         
-                                 write_en   => update_flag_ff,
-                                 D          => is_zero_SIG,
-                                 Q          => flag_zero_SIG);
+                                    reset      => reset,         
+                                    write_en   => update_flag_ff,
+                                    D          => is_zero_SIG,
+                                    Q          => flag_zero_SIG);
 
     Dff_flag_not_zero_pm: D_ff port map(clock      => clock,
-                                     reset      => reset, 
-                                     write_en   => update_flag_ff,
-                                     D          => is_not_zero_SIG,
-                                     Q          => flag_not_zero_SIG);
+                                        reset      => reset, 
+                                        write_en   => update_flag_ff,
+                                        D          => is_not_zero_SIG,
+                                        Q          => flag_not_zero_SIG);
 
     Dff_flag_less_pm: D_ff port map(clock    => clock,
-                                 reset       => reset,
-                                 write_en    => update_flag_ff,
-                                 D           => is_less_SIG,
-                                 Q           => flag_less_SIG);
+                                    reset       => reset,
+                                    write_en    => update_flag_ff,
+                                    D           => is_less_SIG,
+                                    Q           => flag_less_SIG);
           
     PC_out_data <= PC_data_out_SIG;
     rom_data <= rom_data_SIG;    

@@ -11,7 +11,11 @@ entity control_unit is
         rom_data : in unsigned(15 downto 0); -- Instruction
 
         -- RAM Data
-        ram_data : in unsigned(15 downto 0);
+        ram_data_in     : out unsigned(15 downto 0);
+        ram_address     : out unsigned(6 downto 0);
+        ram_write_en    : out std_logic;
+
+        selec_regFile_input : out std_logic;
 
         -- ULA Data
         ULA_out         : in unsigned(15 downto 0); -- Result of past ULA operation
@@ -171,14 +175,23 @@ begin
     PC_data_in <= PC_data_out + "0000001"   when jump_en = '0' else
                   jump_address              when jump_en = '1';
     
+    -- Select if ULA data input will be register B output (0) or constant (1)              
     ULA_inputB <= selec_const when opcode = load_opcode else
                   selec_mux_regB;
 
     write_en <= '1' when (state_sig = execution_state and ((opcode = load_opcode) or 
                                                            (opcode = copy_opcode) or 
                                                            (opcode = add_opcode)  or 
-                                                           (opcode = subt_opcode))) else
+                                                           (opcode = subt_opcode) or 
+                                                           (opcode = readRAM_opcode))) else
                 '0';
+
+    ram_write_en <= '1' when (state_sig = execution_state and (opcode = loadRAM_opcode)) else
+                    '0';
+    
+    -- Select if Register File data input will be ULA output (0) or RAM output (1)
+    selec_regFile_input <= '1' when (opcode = readRAM_opcode) else
+                           '0';
 
     ----- Setting signals used for setting jump condition flags -----
     is_zero <= '1' when (((opcode = add_opcode)  or 

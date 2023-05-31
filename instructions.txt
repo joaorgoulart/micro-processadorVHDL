@@ -46,7 +46,7 @@ Escrever na memória (RAM)
 Ler da memória (RAM)
 	MOV <destino>, <ponteiro>
 	opcode: 1000
-	<destino>: registrador o dado lido será armazenado
+	<destino>: registrador onde o dado lido será armazenado
 	<ponteiro>: registrador que aponta para endereço na RAM
 
 Desvio condicional:
