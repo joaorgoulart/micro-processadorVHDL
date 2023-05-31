@@ -10,6 +10,9 @@ entity control_unit is
         -- ROM Data
         rom_data : in unsigned(15 downto 0); -- Instruction
 
+        -- RAM Data
+        ram_data : in unsigned(15 downto 0);
+
         -- ULA Data
         ULA_out         : in unsigned(15 downto 0); -- Result of past ULA operation
         ULA_inputB      : out std_logic; -- Either a constant or register B
@@ -70,13 +73,16 @@ architecture a_control_unit of control_unit is
     constant execution_state    : unsigned(1 downto 0) := "10";
 
     -- Constants for opcodes
+    constant nop_opcode     : unsigned(3 downto 0) := "0000";   -- NOP
     constant load_opcode    : unsigned(3 downto 0) := "0001";   -- MOV <reg>, <value>
     constant copy_opcode    : unsigned(3 downto 0) := "0010";   -- MOV <reg>, <reg>
     constant add_opcode     : unsigned(3 downto 0) := "0011";   -- ADD <reg>, <reg>
     constant subt_opcode    : unsigned(3 downto 0) := "0100";   -- SUB <reg>, <reg>
     constant cmp_opcode     : unsigned(3 downto 0) := "0101";   -- CMP <reg>, <reg>
-    constant jmpa_opcode    : unsigned(3 downto 0) := "1001";   -- JMPA <condition code>, <address>
-    constant jmpr_opcode    : unsigned(3 downto 0) := "1011";   -- JMPR <condition code>, <value>
+    constant loadRAM_opcode : unsigned(3 downto 0) := "0111";   -- MOV <address>, <reg>
+    constant readRAM_opcode : unsigned(3 downto 0) := "1000";   -- MOV <reg>, <reg>
+    constant jmpa_opcode    : unsigned(3 downto 0) := "1101";   -- JMPA <condition code>, <address>
+    constant jmpr_opcode    : unsigned(3 downto 0) := "1110";   -- JMPR <condition code>, <value>
     constant jmps_opcode    : unsigned(3 downto 0) := "1111";   -- JMPS <address>
 
     -- Constants for ULA operations
@@ -110,6 +116,13 @@ begin
     ----------------------------- INSTRUCTION DECODE -----------------------------
 
     opcode <= rom_data(15 downto 12);
+
+    ram_address <= rom_data(11 downto 5) when (opcode = loadRAM_opcode) else
+                   reg_out when (opcode = readRAM_opcode) else
+                   "0000000";
+
+    ram_data_in <= reg_out when (opcode = loadRAM_opcode) else
+                   "0000000000000000";
 
     -- Set condition for jump
     jump_condition <= rom_data(11 downto 10) when (opcode = jmpa_opcode or opcode = jmpr_opcode) else
@@ -162,32 +175,29 @@ begin
                   selec_mux_regB;
 
     write_en <= '1' when (state_sig = execution_state and ((opcode = load_opcode) or 
-                                                          (opcode = copy_opcode) or 
-                                                          (opcode = add_opcode)  or 
-                                                          (opcode = subt_opcode))) else
+                                                           (opcode = copy_opcode) or 
+                                                           (opcode = add_opcode)  or 
+                                                           (opcode = subt_opcode))) else
                 '0';
 
     ----- Setting signals used for setting jump condition flags -----
-    is_zero <= '1' when (state_sig = execution_state and ((opcode = load_opcode) or 
-                                                         (opcode = copy_opcode) or 
-                                                         (opcode = add_opcode)  or 
-                                                         (opcode = subt_opcode)) and ULA_out = "0000000000000000") else
+    is_zero <= '1' when (((opcode = add_opcode)  or 
+                          (opcode = subt_opcode)) and ULA_out = "0000000000000000") else
                '0';
     
-    is_not_zero <= '0' when (state_sig = execution_state and ((opcode = load_opcode) or 
-                                                              (opcode = copy_opcode) or 
-                                                              (opcode = add_opcode)  or 
-                                                              (opcode = subt_opcode)) and ULA_out = "0000000000000000") else
+    is_not_zero <= '0' when (((opcode = add_opcode)  or 
+                              (opcode = subt_opcode)) and ULA_out = "0000000000000000") else
                    '1';
 
-    is_less <= '1' when (state_sig = execution_state and ((opcode = cmp_opcode) and carry_subt = '1')) else
+    is_less <= '1' when ((opcode = cmp_opcode) and carry_subt = '1') else
                '0';
     -----------------------------------------------------------------
 
-    not_jump_intruction <= '1' when state_sig = execution_state and ((opcode = load_opcode) or 
-                                                                     (opcode = copy_opcode) or 
-                                                                     (opcode = add_opcode)  or 
-                                                                     (opcode = subt_opcode) or
-                                                                     (opcode = cmp_opcode)) else
+    not_jump_intruction <= '1' when (state_sig = execution_state and ((opcode = load_opcode) or 
+                                                                      (opcode = copy_opcode) or 
+                                                                      (opcode = add_opcode)  or 
+                                                                      (opcode = subt_opcode) or
+                                                                      (opcode = cmp_opcode)  or
+                                                                      (opcode = nop_opcode))) else
                            '0';                                                    
 end architecture;

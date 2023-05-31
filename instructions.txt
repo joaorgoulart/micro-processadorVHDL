@@ -1,3 +1,4 @@
+
 Carga de Constante 
 	MOV <destino>, <origem>
 	opcode: 0001
@@ -28,7 +29,6 @@ Subtração de dois valores:
 	
 	A instrução SUB subtrai o valor do destino.
 
-
 Comparar dois valores
 	CMP <reg>, <reg>
 	opcode: 0101
@@ -37,11 +37,23 @@ Comparar dois valores
 
 	A instrucão CMP compara o valor do primeiro registrador com o valor do segundo sem alterar o valor dos registradores. Se o primeiro for menor que o segundo a saída da ULA será 1.
 
+Escrever na memória (RAM)
+	MOV <destino>, <value>
+	opcode: 0111
+	<destino>: endereço na RAM onde o dado será armazenado
+	<value>: registrador com dado a armazenar
+
+Ler da memória (RAM)
+	MOV <destino>, <ponteiro>
+	opcode: 1000
+	<destino>: registrador o dado lido será armazenado
+	<ponteiro>: registrador que aponta para endereço na RAM
+
 Desvio condicional:
 
 	Desvio Absoluto:
 	JMPA <condição>, <endereço>
-	opcode: 1001
+	opcode: 1101
 	<condição>: condição que deverá ser cumprida para o desvio ser realizado;
 
 	Condição	Código
@@ -55,7 +67,7 @@ Desvio condicional:
 
 	Desvio Relativo:
 	JMPR <condição>, <endereço>
-	opcode: 1011
+	opcode: 1110
 	<condição>: condição que deverá ser cumprida para o desvio ser realizado
 
 	Condição	Código
