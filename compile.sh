@@ -7,6 +7,7 @@ ghdl -a mux.vhd
 ghdl -a uProc.vhd
 ghdl -a state_mach.vhd
 ghdl -a rom.vhd
+ghdl -a ram.vhd
 ghdl -a reg16bits.vhd
 ghdl -a PC.vhd
 ghdl -a mux4x1.vhd
