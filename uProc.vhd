@@ -201,7 +201,7 @@ begin
                                            ram_address         => ram_address_SIG,
                                            ram_write_en        => ram_write_en_SIG,
                                            selec_regFile_input => selec_regFile_input_SIG,
-                                           regB_out            => regOutB_SIG
+                                           regB_out            => regOutB_SIG,
                                            ULA_out             => ULA_output,     
                                            ULA_inputB          => ULA_inputB_SIG,      
                                            ULA_selec_op        => ULA_selec_op_SIG,   
