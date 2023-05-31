@@ -124,7 +124,7 @@ begin
     opcode <= rom_data(15 downto 12);
 
     ram_address <= rom_data(11 downto 5) when (opcode = loadRAM_opcode) else
-                   regB_out when (opcode = readRAM_opcode) else
+                   regB_out(6 downto 0) when (opcode = readRAM_opcode) else
                    "0000000";
 
     ram_data_in <= regB_out when (opcode = loadRAM_opcode) else

@@ -143,6 +143,8 @@ architecture a_uProc of uProc is
     signal ram_data_out_SIG : unsigned(15 downto 0);
     signal ram_address_SIG  : unsigned(6 downto 0);
 
+    signal selec_regFile_input_SIG : std_logic;
+
     signal regFile_input : unsigned(15 downto 0);
 
     -- PC data (PC <-> Control Unit)
