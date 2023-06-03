@@ -165,7 +165,9 @@ begin
     selec_regB <= rom_data(8 downto 6) when (opcode = copy_opcode) or 
                                             (opcode = add_opcode)  or
                                             (opcode = subt_opcode) or
-                                            (opcode = cmp_opcode) else
+                                            (opcode = cmp_opcode)  or
+                                            (opcode = readRAM_opcode) else
+                  rom_data(2 downto 0) when (opcode = loadRAM_opcode) else 
                   "000";
 
     -- Concatenate constant to form 16 bit word for ULA
