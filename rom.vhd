@@ -68,7 +68,7 @@ architecture a_rom of rom is
         -- reading ram address
         34 => "1000" & "111" & "001" & "000000",
 
-        -- abaixo: casos omissos => (zero em todos os bits) 
+        -- below: missing cases => (zero in all bits);
         others => (others=>'0')
     );
 begin
