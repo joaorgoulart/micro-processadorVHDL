@@ -43,6 +43,10 @@ Escrever na memória (RAM)
 	<destino>: endereço na RAM onde o dado será armazenado
 	<value>: registrador com dado a armazenar
 
+	<destino> pode ser uma constante ou um registrador 
+	constante: 0111 00 <constante7bits> <reg3bits>
+	registrador: 0111 01 0000<reg3bits> <reg3bits> 
+
 Ler da memória (RAM)
 	MOV <destino>, <ponteiro>
 	opcode: 1000

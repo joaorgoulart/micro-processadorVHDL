@@ -17,6 +17,7 @@ entity control_unit is
 
         selec_regFile_input : out std_logic;
 
+        regA_out : in unsigned(15 downto 0);
         regB_out : in unsigned(15 downto 0);
 
         -- ULA Data
@@ -123,7 +124,8 @@ begin
 
     opcode <= rom_data(15 downto 12);
 
-    ram_address <= rom_data(11 downto 5) when (opcode = loadRAM_opcode) else
+    ram_address <= rom_data(9 downto 3) when (opcode = loadRAM_opcode and rom_data(11 downto 10) = "00") else
+                   regA_out(6 downto 0) when (opcode = loadRAM_opcode and rom_data(11 downto 10) = "01") else
                    regB_out(6 downto 0) when (opcode = readRAM_opcode) else
                    "0000000";
 
@@ -159,6 +161,7 @@ begin
     ----------------------------- INSTRUCTION EXECUTION -----------------------------
 
     selec_regA <= "000"                 when (opcode = load_opcode or opcode = copy_opcode)                         else
+                  rom_data(5 downto 3)  when (opcode = loadRAM_opcode and rom_data(11 downto 10) = "01")             else
                   rom_data(11 downto 9) when (opcode = add_opcode or opcode = subt_opcode or opcode = cmp_opcode)   else 
                   "000";
                   

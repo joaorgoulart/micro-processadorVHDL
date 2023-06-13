@@ -58,6 +58,7 @@ architecture a_uProc of uProc is
             ram_address         : out unsigned(6 downto 0);
             ram_write_en        : out std_logic;
             selec_regFile_input : out std_logic;
+            regA_out            : in unsigned(15 downto 0);
             regB_out            : in unsigned(15 downto 0);
             ULA_out             : in unsigned(15 downto 0);
             ULA_inputB          : out std_logic;
@@ -203,6 +204,7 @@ begin
                                            ram_address         => ram_address_SIG,
                                            ram_write_en        => ram_write_en_SIG,
                                            selec_regFile_input => selec_regFile_input_SIG,
+                                           regA_out            => regOutA_ulaA,
                                            regB_out            => regOutB_SIG,
                                            ULA_out             => ULA_output,     
                                            ULA_inputB          => ULA_inputB_SIG,      
