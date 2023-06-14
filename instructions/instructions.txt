@@ -40,12 +40,12 @@ Comparar dois valores
 Escrever na memória (RAM)
 	MOV <destino>, <value>
 	opcode: 0111
-	<destino>: endereço na RAM onde o dado será armazenado
-	<value>: registrador com dado a armazenar
-
-	<destino> pode ser uma constante ou um registrador 
+	<destino>: endereço na RAM onde o dado será armazenado,
+	podendo ser uma constante ou um registrador, de modo que:
 	constante: 0111 00 <constante7bits> <reg3bits>
-	registrador: 0111 01 0000<reg3bits> <reg3bits> 
+	registrador: 0111 01 0000 <reg3bits> <reg3bits> 
+
+	<value>: registrador com dado a armazenar
 
 Ler da memória (RAM)
 	MOV <destino>, <ponteiro>
@@ -83,7 +83,6 @@ Desvio condicional:
 
 	A instrução JMPR realiza um salto condicional para um endereço relativo de memória.
 
-	
 Desvio incondicional:
 	JMPS <endereço>
 	opcode: 1111
