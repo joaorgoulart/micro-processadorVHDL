@@ -1,0 +1,60 @@
+MOV R1, #33     0001 001 000 100001  -- limite para numeros primos
+MOV R2, #2      0001 010 000000 010  -- contador numero por numero
+MOV R3, #1      0001 011 000000 001  -- incrementador
+
+
+4: -- loop armazenar valores 2 a 32
+MOV [R2], R2    0111 01 0000 010 010 -- adiciona o valor x no endereço x
+ADD R2, R3      0011 010 011 000000  -- faz x + 1
+
+CMP R2, R1      0101 010 001 000000  -- verifica se o contador ainda não chegou em 32
+JMPA 11, 4      1101 11 000 0000100  -- define o loop 
+
+
+MOV R2, #4      0001 010 000000 100  -- reseta o contador para o inicio
+MOV R3, #2      0001 011 000000 010  -- novo incrementador (multiplos de 2)
+11: -- loop eliminar multiplos de 2
+MOV [R2], R0    0111 01 0000 010 000 -- zera o endereço atual (multiplo de 2) 
+ADD R2, R3      0011 010 011 000000  -- passa R2 para o prox endereço multiplo de 2
+
+CMP R2, R1      0101 010 001 000000  -- verifica se ainda não chegou ao endereço 32
+JMPA 11, 11     1101 11 000 0001011  -- define o loop
+
+
+MOV R2, #6      0001 010 000000110   -- reseta o contador para o inicio
+MOV R3, #3      0001 011 000000011   -- novo incrementador (multiplos de 3)
+18: -- loop eliminar múltiplos de 3
+MOV [R2], R0    0111 01 0000 010 000 -- zera o endereço atual (multiplo de 3) 
+ADD R2, R3      0011 010 011 000000  -- passa R2 para o prox endereço multiplo de 2
+
+CMP R2, R1      0101 010 001 000000  -- verifica se ainda não chegou ao endereço 32
+JMPA 11, 18     1101 11 000 0010010  -- define o loop
+
+
+MOV R2, #10     0001 010 000001010   -- reseta o contador para o inicio
+MOV R3, #5      0001 011 000000101   -- novo incrementador (multiplos de 5)
+25: -- loop eliminar multiplos de 5
+MOV [R2], R0    0111 01 0000 010 000 -- zera o endereço atual (multiplo de 5) 
+ADD R2, R3      0011 010 011 000000  -- passa R2 para o prox endereço multiplo de 2
+
+CMP R2, R1      0101 010 001 000000  -- verifica se ainda não chegou ao endereço 32
+JMPA 11, 25     1101 11 000 0011001  -- define o loop
+
+
+MOV R1, #32     0001 001 000100000
+MOV R2, #2      0001 010 000000010
+MOV R3, #1      0001 011 000000001
+33: -- loop para ler a RAM de 2 a 32
+MOV R4, [R2]    1000 100 010 000000  -- lê o dado no endereço de R2
+ADD R2, R3      0011 010 011 000000  -- avança para o proximo endereço da RAM
+
+SUB R4, R0      0100 100 000 000000  -- verifica se o numero em R4 é diferente de 0 zero
+JMPA 10, 40     1101 10 000 0101000  -- se for diferente de 0, pula para 40
+
+CMP R1, R2      0101 000 010 000000  -- verifica se passou do endereço 32
+JMPA 11, 127    1101 11 0000 1111111 -- se passou, pula ao final do programa
+JMPS 33         1111 0100001 00000 -- neste ponto, o valor em R4 é zero mas ainda não atingiu o endereço 32, portanto retorna ao loop 33
+
+40: -- se o num em R4 é primo, envia-o para a saida da ULA
+ADD R4, R0      0011 100 000 000000     
+JMPS 33         1111 0100001 00000
