@@ -213,11 +213,8 @@ begin
                '0';
     -----------------------------------------------------------------
 
-    not_jump_intruction <= '1' when (state_sig = execution_state and ((opcode = load_opcode) or 
-                                                                      (opcode = copy_opcode) or 
-                                                                      (opcode = add_opcode)  or 
+    not_jump_intruction <= '1' when (state_sig = execution_state and ((opcode = add_opcode)  or 
                                                                       (opcode = subt_opcode) or
-                                                                      (opcode = cmp_opcode)  or
-                                                                      (opcode = nop_opcode))) else
+                                                                      (opcode = cmp_opcode))) else
                            '0';                                                    
 end architecture;
